@@ -1,0 +1,15 @@
+{
+    "is_test": false,
+    "direction": "receive",
+    "fax": {
+        "status": "OK",
+        "id": 2,
+        "direction":"receive",
+        "num_pages":1,  
+        "cost":7,
+        "is_test":true,
+        "requested_at":"2015-07-13 22:53.33",
+        "from_number":"141434234"
+    },
+    "metadata": "wweeeeee"
+}
