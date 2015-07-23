@@ -1,3 +1,4 @@
+django
 pytesseract   
 djangorestframework
 markdown
