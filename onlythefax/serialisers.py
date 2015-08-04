@@ -28,10 +28,10 @@ class IncommigPhaxioFaxSerializer(serializers.Serializer):
     def create(self, validated_data):
         fax = Fax()
         fax.phaxio_id = validated_data["fax"]["id"];
-        fax.phaxio_cost_US_c = validated_data["fax"]["cost"]
-        fax.phaxio_status = validated_data["fax"]["status"]
-        fax.phaxio_requested_at = validated_data["fax"]["requested_at"]
-        fax.phaxio_from_number = validated_data["fax"]["from_number"]
+        fax.phaxio_cost_US_c = validated_data["fax"].get("cost")
+        fax.phaxio_status = validated_data["fax"].get("status")
+        fax.phaxio_requested_at = validated_data["fax"].get("requested_at")
+        fax.phaxio_from_number = validated_data["fax"].get("from_number")
         fax.phaxio_to_number = validated_data["fax"].get("to_number")
         fax.phaxio_recipients = validated_data["fax"].get("recipients")
         fax.phaxio_tags = validated_data["fax"].get("tags")
