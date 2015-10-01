@@ -1,11 +1,12 @@
 console.log('Loading function');
 
-var doc = require('aws-sdk');   
+var AWS = require('aws-sdk');   
 var formData = require('form-data');
 var streams = require('memory-streams');
 
-var dynamo = new doc.DynamoDB();
-
+var dynamo = new AWS.DynamoDB();
+var s3 = new AWS.S3();
+    
 var optionallyAddField = function(attrName, fieldName, dataIn, dataOut, typeString){
     console.log(typeString)
     if (fieldName in dataIn){
@@ -24,7 +25,7 @@ var optionallyAddField = function(attrName, fieldName, dataIn, dataOut, typeStri
 };
 
 // TODO get binary to image as per https://www.phaxio.com/docs/api/general/faxFile/
-var getThumbnailImage = function(faxid, context)
+var getThumbnailImage = function(faxid, requested_at, context)
 {
     console.log("getThumbnailImage");
     var phaxioFilePost = "https://api.phaxio.com/v1/faxFile";
@@ -48,28 +49,43 @@ var getThumbnailImage = function(faxid, context)
         else
         {
             console.log("result received");
-//            console.log(res);
-                // Asuming this is a stream
-                res.pipe(writer);
-                console.log("wrote to pipe");
-                console.log("length " + writer.length);
-                console.log(writer.toString());
-                // TODO save to S3
-                context.succeed('Saved image data');
-  /*          }
-            else
+            console.log(res);
+            // Asuming this is a stream
+            res.pipe(writer);
+            console.log("wrote to pipe");
+            console.log("length " + writer.length);
+            console.log(writer.toString());
+            
+            // TODO error on empty file.
+            if (typeof(writer.length) == 'undefined' || writer.length ==0 )          
             {
-                 console.log("result received, but bad status code: " + res.statusCode());  
-                 context.fail('image save failed');
-            }*/
-           
+                context.fail("empty file received");
+            }
+            else {
+            
+                var dstBucket = "com.onlythefax.images";
+                // TODO for better filename use https://www.npmjs.com/package/content-disposition
+                
+                var faxidString = faxid.toString();
+                var dstKey = "thumbnails/" + requested_at + "_" +faxidString + "/" + faxidString + ".jpg";
+            
+                s3.putObject({
+					Bucket: dstBucket,
+					Key: dstKey,
+					Body: writer.toBuffer(),
+					ContentType: res.ContentType
+				},
+				function (err) {
+				    if (err){
+				        context.fail("Failed to save to s3 " + err);
+				    }
+				    else{
+				        context.succeed('Saved image data to s3');
+				    }
+				});
+            }
+            
         }
-       /* console.log(res.statusCode);
-        if (res.statusCode == 200)
-        {
-            
-            
-        }*/
     });
     
 }
@@ -103,11 +119,12 @@ exports.handler = function(event, context) {
                 console.log('calling getThumbnailImage');
                 console.log('calling arg1 ' + event.fax.id);
                 console.log('calling arg2 ' + context);
-                getThumbnailImage(event.fax.id, context);
+                getThumbnailImage(event.fax.id, event.fax.requested_at, context);
                 //context.succeed('Saved data');
                 
                 // Save data to S3
                 // Update entry as per above with update item http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#updateItem-property
+                
             }
         });
 };
