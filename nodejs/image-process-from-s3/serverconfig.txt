@@ -1,0 +1,2 @@
+# reqruied for tesseract to work.
+sudo apt-get install tesseract-ocr
