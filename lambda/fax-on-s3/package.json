@@ -1,0 +1,7 @@
+{
+    "name": "s3-ocr-sender",
+    "main": "fax-on-s3.js",
+    "dependencies": {
+        "request": "~2.65.0"
+    }
+}

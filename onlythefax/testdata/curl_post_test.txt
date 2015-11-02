@@ -1,4 +1,4 @@
 curl -X POST -H "Content-Type: application/json" --data '{"direction":"in", "is_test":true, "metadata":"weee", "fax":{"id":7, "status":"OK","direction":"receive","cost":7,"requested_at":"2015-07-13 22:53.33","is_test":true, "from_number":"+27218801880"}}' http://ec2-52-25-21-125.us-west-2.compute.amazonaws.com:8000/api/fax2me/
 
-curl -X POST -H "Content-Type: application/json" -H "x-api-key: RHazpQZlFp8U0BcsUcTbv1V3mrb1KJ664K2AWGtO" --data '{"direction":"in", "is_test":true, "metadata":"weee", "fax":{"id":7, "status":"OK","direction":"receive","cost":7,"requested_at":"2015-07-13 22:53.33","is_test":true, "from_number":"+27218801880"}}' https://gd4ukyxqxc.execute-api.us-west-2.amazonaws.com/prod/SaveFaxImage
+curl -X POST -H "Content-Type: application/json" -H "x-api-key: XXYYZZAABBCCDD" --data '{"direction":"in", "is_test":true, "metadata":"weee", "fax":{"id":15, "status":"OK","direction":"receive","cost":7,"requested_at":"2015-10-02 21:31.31","is_test":true, "from_number":"+27218801880"}}' https://gd4ukyxqxc.execute-api.us-west-2.amazonaws.com/prod/SaveFaxImage
 

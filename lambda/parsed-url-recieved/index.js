@@ -11,18 +11,21 @@ var parsedURLUpdated = function(dynamodbRecord){
         }
     }
     
-    
     if ('parsedText' in dynamodbRecord.OldImage && 'parsedText' in dynamodbRecord.NewImage){
         return dynamodbRecord.OldImage.parsedText.S != dynamodbRecord.NewImage.parsedText.S;
     }
     return false;
 };
 
-var sendResponseFax = function(id, range, newImage){
+var sendResponseFax = function(newImage){
     // TODO
     // Get number from newImage,
     // and send Fax of URL
-    console.log("sending fax!!");
+    
+    var parsedText = newImage.parsedText;
+    var recipientNr = newImage['phaxio-from-number']
+    
+    console.log("sending fax!! to " + parsedText.S + " of " + recipientNr.S);
 };
 
 exports.handler = function(event, context) {
@@ -31,13 +34,12 @@ exports.handler = function(event, context) {
         console.log(record.eventName);
         //console.log('DynamoDB Record: %j', record.dynamodb);
         
-        // Keys.
-        var phaxioID = record.dynamodb.Keys["phaxio-id"].N;
-        var phaxioRequestedAt = record.dynamodb.Keys["phaxio-requested-at"].S;
-        
-        if (parsedURLUpdated(record.dynamodb))
+        if (record.eventName == 'MODIFY')
         {
-            sendResponseFax(phaxioID, phaxioRequestedAt, record.dynamodb.NewImage);
+            if (parsedURLUpdated(record.dynamodb))
+            {
+                sendResponseFax(record.dynamodb.NewImage);
+            }
         }
         
     });

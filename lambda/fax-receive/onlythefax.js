@@ -120,11 +120,6 @@ exports.handler = function(event, context) {
                 console.log('calling arg1 ' + event.fax.id);
                 console.log('calling arg2 ' + context);
                 getThumbnailImage(event.fax.id, event.fax.requested_at, context);
-                //context.succeed('Saved data');
-                
-                // Save data to S3
-                // Update entry as per above with update item http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#updateItem-property
-                
             }
         });
 };
