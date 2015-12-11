@@ -30,7 +30,7 @@ faxReceiveRouter.post('/', function (req, res) {
           var faxData = JSON.parse(jsonStringData);
           
           // TODO lambda fax receive URL
-          request({ url: "http://TODOTODODO/lambda-fax-receive",
+          request({ url: "https://n90olzaik3.execute-api.us-west-2.amazonaws.com/prod/FaxReceived",
             method: "POST",
             json: faxData
            }, function (error, response, body){
