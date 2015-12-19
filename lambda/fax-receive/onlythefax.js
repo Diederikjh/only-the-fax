@@ -22,7 +22,7 @@ var optionallyAddField = function(attrName, fieldName, dataIn, dataOut, typeStri
 
 };
 
-var imageReceived = function(faxid, requested_at, buffer, context) {
+var imageReceived = function(faxid, requested_at, buffer, downloadContentType, context) {
     var dstBucket = "com.onlythefax.images";
     // TODO for better filename use https://www.npmjs.com/package/content-disposition
 
@@ -33,6 +33,7 @@ var imageReceived = function(faxid, requested_at, buffer, context) {
     s3.putObject({
             Bucket: dstBucket,
             Key: dstKey,
+            ContentType: downloadContentType,
             Body: buffer
         },
         function(err) {
@@ -53,12 +54,13 @@ var getThumbnailImage = function(faxid, requested_at, context)
     var phaxioFilePost = "https://api.phaxio.com/v1/faxFile";
    
    var writer = new streams.WritableStream();
+   var downloadContentType = '';
    request.post('https://api.phaxio.com/v1/faxFile', {
            form: {
                id: faxid,
                type: 'l',
-               api_key: 'TODO API KEY',
-               api_secret: 'TODO API SECRET'
+               api_key: 'TODO API key',
+               api_secret: 'TODO API secret'
 
            }
        }, function(err, res, body) {
@@ -66,12 +68,13 @@ var getThumbnailImage = function(faxid, requested_at, context)
                context.fail(err);
            }
            else {
-               imageReceived(faxid, requested_at, writer.toBuffer(), context);
+               imageReceived(faxid, requested_at, writer.toBuffer(), downloadContentType, context);
            }
        }).on('response', function(response) {
            console.log('response');
            console.log(response.statusCode);
            console.log(response.headers['content-type']);
+           downloadContentType = response.headers['content-type'];
        })
        .on('error', function(err) {
            console.log('error');
