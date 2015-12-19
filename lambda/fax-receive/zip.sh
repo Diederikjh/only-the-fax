@@ -1,0 +1,1 @@
+zip -r fax-receive.zip ./*

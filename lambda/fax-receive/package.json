@@ -1,0 +1,8 @@
+{
+    "name": "fax-receive",
+    "main": "onlythefax.js",
+    "dependencies": {
+        "memory-streams": "~0.1.0",
+        "request": "~2.67.0"
+    }
+}

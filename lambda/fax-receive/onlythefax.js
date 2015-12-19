@@ -1,112 +1,109 @@
 console.log('Loading function');
 
 var AWS = require('aws-sdk');   
-var formData = require('form-data');
 var streams = require('memory-streams');
+var request    = require("request")
 
 var dynamo = new AWS.DynamoDB();
 var s3 = new AWS.S3();
     
-var optionallyAddField = function(attrName, fieldName, dataIn, dataOut, typeString){
+var optionallyAddField = function(attrName, fieldName, dataIn, dataOut, typeString) {
     console.log(typeString)
-    if (fieldName in dataIn){
+    if (fieldName in dataIn) {
         var attrValue = {};
-        if (typeString =="N")
-        {
+        if (typeString == "N") {
             attrValue[typeString] = dataIn[fieldName].toString();
         }
-        else
-        {
+        else {
             attrValue[typeString] = dataIn[fieldName];
         }
-        dataOut[attrName] = attrValue;   
+        dataOut[attrName] = attrValue;
     }
-    
+
 };
 
-// TODO get binary to image as per https://www.phaxio.com/docs/api/general/faxFile/
+var imageReceived = function(faxid, requested_at, buffer, context) {
+    var dstBucket = "com.onlythefax.images";
+    // TODO for better filename use https://www.npmjs.com/package/content-disposition
+
+    var faxidString = faxid.toString();
+    var dstKey = "thumbnails/" + requested_at + "_" + faxidString + "/" + faxidString + ".jpg";
+    console.log("Saving file `" + dstKey + "`");
+
+    s3.putObject({
+            Bucket: dstBucket,
+            Key: dstKey,
+            Body: buffer
+        },
+        function(err) {
+            if (err) {
+                context.fail("Failed to save to s3 " + err);
+            }
+            else {
+                context.succeed('Saved image data to s3');
+            }
+        });
+
+};
+
+// Download binary to image as per https://www.phaxio.com/docs/api/general/faxFile/
 var getThumbnailImage = function(faxid, requested_at, context)
 {
     console.log("getThumbnailImage");
     var phaxioFilePost = "https://api.phaxio.com/v1/faxFile";
    
-   var form = new formData();
-   
-    console.log("form created");
-   form.append('id', faxid.toString());
-   // s - small jpeg thumbnail l large jpeg thumbnail
-   form.append('type', 'l');
-   form.append('api_key', 'TODO');
-   form.append('api_secret', 'TODO');
-   
-   var writer = new streams.WritableStream(); 
-    console.log("stream created");
-   form.submit(phaxioFilePost, function(err, res) {
-        if (err) {
-            console.error('Upload error' + err);
-            context.fail('ERROR: save image failed: ' + err);
-        }
-        else
-        {
-            console.log("result received");
-            console.log(res);
-            // Asuming this is a stream
-            res.pipe(writer);
-            console.log("wrote to pipe");
-            console.log("length " + writer.length);
-            console.log(writer.toString());
-            
-            // TODO error on empty file.
-            if (typeof(writer.length) == 'undefined' || writer.length ==0 )          
-            {
-                context.fail("empty file received");
-            }
-            else {
-            
-                var dstBucket = "com.onlythefax.images";
-                // TODO for better filename use https://www.npmjs.com/package/content-disposition
-                
-                var faxidString = faxid.toString();
-                var dstKey = "thumbnails/" + requested_at + "_" +faxidString + "/" + faxidString + ".jpg";
-            
-                s3.putObject({
-					Bucket: dstBucket,
-					Key: dstKey,
-					Body: writer.toBuffer(),
-					ContentType: res.ContentType
-				},
-				function (err) {
-				    if (err){
-				        context.fail("Failed to save to s3 " + err);
-				    }
-				    else{
-				        context.succeed('Saved image data to s3');
-				    }
-				});
-            }
-            
-        }
-    });
+   var writer = new streams.WritableStream();
+   request.post('https://api.phaxio.com/v1/faxFile', {
+           form: {
+               id: faxid,
+               type: 'l',
+               api_key: 'TODO API KEY',
+               api_secret: 'TODO API SECRET'
+
+           }
+       }, function(err, res, body) {
+           if (err) {
+               context.fail(err);
+           }
+           else {
+               imageReceived(faxid, requested_at, writer.toBuffer(), context);
+           }
+       }).on('response', function(response) {
+           console.log('response');
+           console.log(response.statusCode);
+           console.log(response.headers['content-type']);
+       })
+       .on('error', function(err) {
+           console.log('error');
+           console.log(err);
+       })
+       .pipe(writer);
     
+    console.log("requested post");
 }
 
 exports.handler = function(event, context) {
     console.log('Received event:', JSON.stringify(event, null, 2));
     
+    //Convert epoch number date to String 
+    var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+    d.setUTCSeconds(event.requested_at);
+    var requestDateAsString = d.toISOString();
+    
     // Key fields
     var item = {
-            "phaxio-id":{"N":event.fax.id.toString()},
-            "phaxio-requested-at":{"S":event.fax.requested_at},
+            "phaxio-id":{"N":event.id.toString()},
+            "phaxio-requested-at":{"S":requestDateAsString},
     };
     
     optionallyAddField("phaxio-metadata", "metadata", event, item, "S");
     optionallyAddField("phaxio-is-test", "is_test", event, item, "BOOL");
-    optionallyAddField("phaxio-status", "status", event.fax, item, "S");
-    optionallyAddField("phaxio-num-pages", "num_pages", event.fax, item, "N");
-    optionallyAddField("phaxio-cost", "cost", event.fax, item, "N");
-    optionallyAddField("phaxio-from-number", "from_number", event.fax, item, "N");
+    optionallyAddField("phaxio-status", "status", event, item, "S");
+    optionallyAddField("phaxio-num-pages", "num_pages", event, item, "N");
+    optionallyAddField("phaxio-cost", "cost", event, item, "N");
+    optionallyAddField("phaxio-from-number", "from_number", event, item, "N");
     
-    console.log('Received event:', JSON.stringify(item, null, 2));
+    console.log('Save item:', JSON.stringify(item, null, 2));
     
     dynamo.putItem({
         "TableName": "fax-received",
@@ -117,9 +114,9 @@ exports.handler = function(event, context) {
             } else {
                 console.log('Dynamo Success: ' + JSON.stringify(data, null, '  '));
                 console.log('calling getThumbnailImage');
-                console.log('calling arg1 ' + event.fax.id);
+                console.log('calling arg1 ' + event.id);
                 console.log('calling arg2 ' + context);
-                getThumbnailImage(event.fax.id, event.fax.requested_at, context);
+                getThumbnailImage(event.id, event.requested_at, context);
             }
         });
 };
