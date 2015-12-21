@@ -25,7 +25,7 @@ var sendResponseFax = function(newImage){
     var parsedText = newImage.parsedText;
     var recipientNr = newImage['phaxio-from-number']
     
-    console.log("sending fax!! to " + parsedText.S + " of " + recipientNr.S);
+    console.log("sending fax!! to " + parsedText.S + " of " + recipientNr.N);
 };
 
 exports.handler = function(event, context) {

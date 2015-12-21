@@ -60,7 +60,7 @@ var getThumbnailImage = function(faxid, requested_at, context)
                id: faxid,
                type: 'l',
                api_key: 'TODO API key',
-               api_secret: 'TODO API secret'
+               api_secret: 'TODO API sercret'
 
            }
        }, function(err, res, body) {
@@ -119,7 +119,7 @@ exports.handler = function(event, context) {
                 console.log('calling getThumbnailImage');
                 console.log('calling arg1 ' + event.id);
                 console.log('calling arg2 ' + context);
-                getThumbnailImage(event.id, event.requested_at, context);
+                getThumbnailImage(event.id, requestDateAsString, context);
             }
         });
 };
