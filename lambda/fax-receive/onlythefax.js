@@ -2,7 +2,8 @@ console.log('Loading function');
 
 var AWS = require('aws-sdk');   
 var streams = require('memory-streams');
-var request    = require("request")
+var request    = require("request");
+var api_keys = require("api_keys.js")
 
 var dynamo = new AWS.DynamoDB();
 var s3 = new AWS.S3();
@@ -59,8 +60,8 @@ var getThumbnailImage = function(faxid, requested_at, context)
            form: {
                id: faxid,
                type: 'l',
-               api_key: 'TODO API key',
-               api_secret: 'TODO API sercret'
+               api_key: api_keys.PHAXIO_API_KEY,
+               api_secret: api_keys.PHAXIO_API_SECRET
 
            }
        }, function(err, res, body) {

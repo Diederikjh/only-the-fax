@@ -19,7 +19,7 @@
 		var dataAsString = JSON.stringify(params);
 		console.log(dataAsString);
 
-	    request({ url: "http://ec2-54-200-235-171.us-west-2.compute.amazonaws.com:8080/image-ocr",
+	    request({ url: "http://onlythefax-ocr-env.us-west-2.elasticbeanstalk.com/image-ocr",
         method: "POST",
         json: params
         }, function (error, response, body){

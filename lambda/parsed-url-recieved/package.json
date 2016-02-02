@@ -1,0 +1,8 @@
+{
+    "name": "parsed-url-received",
+    "main": "index.js",
+    "dependencies": {
+        "request": "~2.67.0",
+        "valid-url": "~1.0.9"
+    }
+}
