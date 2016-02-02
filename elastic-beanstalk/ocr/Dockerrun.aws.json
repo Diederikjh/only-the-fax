@@ -1,0 +1,23 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
+    {
+      "name": "fax-ocr",
+      "image": "diederikjh/faxit2me-ocr",
+      "essential": true,
+      "memory": 256,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 8080
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "awseb-logs-fax-ocr",
+          "containerPath": "/var/log/fax-ocr"
+        }
+      ]
+    }
+  ]
+}
