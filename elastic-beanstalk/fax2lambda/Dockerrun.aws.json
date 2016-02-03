@@ -1,0 +1,22 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
+    {
+      "name": "fax2lambda",
+      "image": "diederikjh/faxit2me-fax2lambda",
+      "essential": true,
+       "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 8080
+        }],
+      "mountPoints": [
+        {
+          "sourceVolume": "awseb-logs-fax2lambda",
+          "containerPath": "/var/log/fax2lambda"
+        }
+      ],
+      "memory": 256
+    }
+  ]
+}
