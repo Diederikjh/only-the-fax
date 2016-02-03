@@ -1,0 +1,1 @@
+curl -v -F direction=received -F 'fax={"id":21172267,"num_pages":1,"cost":7,"direction":"received","status":"success","is_test":true,"requested_at":1433914489,"completed_at":1433914488,"from_number":"+16504888494","to_number":"+13142666714"}' -F is_test=false -F success=true -F upload=@localfilename URL

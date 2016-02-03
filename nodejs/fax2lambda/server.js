@@ -21,7 +21,8 @@ faxReceiveRouter.post('/', function (req, res) {
     form.parse(req, function(err, fields, files) {
         if (err) {
           console.log(err);
-          res.json({message: 'fail'});               
+          ///res.json({message: 'fail'});               
+          res.fail(err);
         }
         else{
           console.log(util.inspect({fields: fields, files: files}));
@@ -29,14 +30,15 @@ faxReceiveRouter.post('/', function (req, res) {
           var jsonStringData = fields.fax[0];
           var faxData = JSON.parse(jsonStringData);
           
-          // TODO lambda fax receive URL
+          // TODO HTTP header for auth
           request({ url: "https://n90olzaik3.execute-api.us-west-2.amazonaws.com/prod/FaxReceived",
             method: "POST",
-            json: faxData
+            json: faxData,
+            headers: {"x-api-key":process.env.AWS_GATEWAY_API_KEY}
            }, function (error, response, body){
              console.log(body);
              if (!error && response.statusCode === 200) {
-                res.succeed("Sent data to fax receive lambda");
+                res.json({message:"Sent data to fax receive lambda"});
              }
              else {
                  console.log("Error with data send to lambda");
