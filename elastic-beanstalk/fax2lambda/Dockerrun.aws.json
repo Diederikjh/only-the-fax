@@ -3,7 +3,7 @@
   "containerDefinitions": [
     {
       "name": "fax2lambda",
-      "image": "diederikjh/faxit2me-fax2lambda",
+      "image": "diederikjh/faxit2me-fax2lambda:v2",
       "essential": true,
        "portMappings": [
         {
