@@ -18,33 +18,37 @@ var port = process.env.PORT || 8080;        // set our port
 var faxReceiveRouter = express.Router();
 
 
-var validateReceivedMessage = function(requestBody, requestUrl, requestFiles) {
+var validateReceivedMessage = function(fields, requestUrl, files) {
 
-    console.log(requestBody);
+    console.log(fields);
     console.log(requestUrl);
-    console.log(requestFiles);
+    console.log(files);
 
     var names = [];
-    for (var idx in requestBody) names.push(idx);
+    for (var idx in fields) names.push(idx);
     names.sort();
     
     for (var idx = 0; idx < names.length; idx++) {
-        requestUrl += names[idx] + requestBody[names[idx]];
+        if (fields[names[idx]].length != 1) {
+            console.warn("Not one field value for field name " + names[idx] );
+        }
+        requestUrl += names[idx] + fields[names[idx]][0];
     }
 
     //sort the file parts and add their SHA1 sums to the URL
     var fileNames = [];
     var fieldNamePaths = {};
-    for (var idx in requestFiles){
-        var fieldname = requestFiles[idx].fieldname;
+    for (var idx in files){
+        var fieldname = files[idx].fieldname;
         fileNames.push(fieldname);
-        fieldNamePaths[fieldname] = requestFiles[idx].path;
+        console.log(files[idx]);
+        fieldNamePaths[fieldname] = files[idx].path;
     }
     fileNames.sort();
     
-    // TODO
-    // crypto! 
-    // fs
+    console.log(fieldNamePaths[fieldname]);
+    console.log(fileNames);
+    
     for (var idx = 0; idx < fileNames.length; idx++) {
         var fileSha1Hash = crypto.createHash('sha1').update(fs.readFileSync(fieldNamePaths[fileNames[idx]])).digest('hex');
         requestUrl += fileNames[idx] + fileSha1Hash;
@@ -63,7 +67,7 @@ var validateReceivedMessage = function(requestBody, requestUrl, requestFiles) {
 
 faxReceiveRouter.post('/', function (req, res) {
     // parse a file upload 
-    var form = new multiparty.Form();
+    var form = new multiparty.Form({autoFiles:true});
 
     form.parse(req, function(err, fields, files) {
         if (err) {
@@ -74,7 +78,7 @@ faxReceiveRouter.post('/', function (req, res) {
           console.log(util.inspect({fields: fields, files: files}));
           
           // Check that message received is from actual phaxio sender.
-          if (validateReceivedMessage(req.body, req.url, req.files))
+          if (validateReceivedMessage(fields, req.url, files))
           {
               var jsonStringData = fields.fax[0];
               var faxData = JSON.parse(jsonStringData);
