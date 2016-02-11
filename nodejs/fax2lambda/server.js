@@ -35,14 +35,20 @@ var validateReceivedMessage = function(fields, requestUrl, files) {
         requestUrl += names[idx] + fields[names[idx]][0];
     }
 
+    console.log(requestUrl);
+
     //sort the file parts and add their SHA1 sums to the URL
     var fileNames = [];
     var fieldNamePaths = {};
     for (var idx in files){
-        var fieldname = files[idx].fieldname;
+        if (files[idx].length != 1) {
+            console.error("not one files field for "+ idx);
+        }
+        var idxFile =  files[idx][0];
+        var fieldname = idxFile.fieldName;
         fileNames.push(fieldname);
-        console.log(files[idx]);
-        fieldNamePaths[fieldname] = files[idx].path;
+        console.log(idxFile);
+        fieldNamePaths[fieldname] = idxFile.path;
     }
     fileNames.sort();
     
