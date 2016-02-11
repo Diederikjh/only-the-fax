@@ -18,7 +18,7 @@ var port = process.env.PORT || 8080;        // set our port
 var faxReceiveRouter = express.Router();
 
 
-var validateReceivedMessage = function(fields, requestUrl, files) {
+var validateReceivedMessage = function(fields, requestUrl, files, phaxioHeaderValue) {
 
     console.log(fields);
     console.log(requestUrl);
@@ -60,7 +60,7 @@ var validateReceivedMessage = function(fields, requestUrl, files) {
         requestUrl += fileNames[idx] + fileSha1Hash;
     }
     
-    // TODO test
+    // TODO use header value?
     var callbackToken = 'aabbccddee';
 
     console.log(crypto.createHmac('sha1', callbackToken).update(requestUrl).digest('hex'));
@@ -83,8 +83,11 @@ faxReceiveRouter.post('/', function (req, res) {
         else{
           console.log(util.inspect({fields: fields, files: files}));
           
+          console.log("headers:");
+          console.log(req.headers);
+          
           // Check that message received is from actual phaxio sender.
-          if (validateReceivedMessage(fields, req.url, files))
+          if (validateReceivedMessage(fields, req.url, files, req.headers["X-Phaxio-Signature"]))
           {
               var jsonStringData = fields.fax[0];
               var faxData = JSON.parse(jsonStringData);
