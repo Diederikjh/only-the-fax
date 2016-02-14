@@ -91,6 +91,9 @@ faxReceiveRouter.post('/', function (req, res) {
           console.log("headers:");
           console.log(req.headers);
           
+          console.log("process.env");
+          console.log(process.env);
+          
           // Check that message received is from actual phaxio sender.
           if (validateReceivedMessage(fields, req.url, files, req.headers["X-Phaxio-Signature"]))
           {
