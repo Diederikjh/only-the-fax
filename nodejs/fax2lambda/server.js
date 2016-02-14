@@ -20,10 +20,15 @@ var faxReceiveRouter = express.Router();
 
 var validateReceivedMessage = function(fields, requestUrl, files, phaxioHeaderValue) {
 
+    console.log('fields');
     console.log(fields);
+    console.log('requestUrl');
     console.log(requestUrl);
+    console.log('files');
     console.log(files);
-
+    console.log('phaxioHeaderValue')
+    console.log(phaxioHeaderValue)
+    
     var names = [];
     for (var idx in fields) names.push(idx);
     names.sort();
@@ -60,12 +65,12 @@ var validateReceivedMessage = function(fields, requestUrl, files, phaxioHeaderVa
         requestUrl += fileNames[idx] + fileSha1Hash;
     }
     
-    // TODO use header value?
-    var callbackToken = 'aabbccddee';
+    var callbackToken = process.env.PHAXIO_CALLBACK_TOKEN;
 
+    console.log('Computed hash');
     console.log(crypto.createHmac('sha1', callbackToken).update(requestUrl).digest('hex'));
     
-    //TODO validate fields.
+    //TODO compare hash with header value
     return true;
     
 };
