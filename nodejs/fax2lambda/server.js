@@ -112,7 +112,7 @@ faxReceiveRouter.post('/', function (req, res) {
                  else {
                      console.log("Error with data send to lambda");
                      console.log(response.statusCode);
-                     res.fail(error);
+                     res.sendStatus(400);
                  }
               });
           }
