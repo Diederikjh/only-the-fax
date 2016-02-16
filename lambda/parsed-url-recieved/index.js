@@ -66,8 +66,10 @@ var sendResponseFax = function(newImage, context){
 
 var sanitizeUrl = function(potentialUrl){
     // Any chars (including newling) http replace with http
-    return potentialUrl.replace(new RegExp("[\\s\\S]*http", "gm"), "http")
-}
+    potentialUrl = potentialUrl.replace(new RegExp("[\\s\\S]*http", "gm"), "http");
+    potentialUrl = potentialUrl.replace(/\s/g, "");
+    return potentialUrl;
+};
 
 exports.handler = function(event, context) {
     event.Records.forEach(function(record) {
@@ -78,7 +80,7 @@ exports.handler = function(event, context) {
             sendResponseFax(record.dynamodb.NewImage, context);
         }
         else {
-            console.log('Event not interesting.')
+            console.log('Event not interesting.');
             context.succeed('Event not interesting.');
         }
 

@@ -83,7 +83,7 @@ faxReceiveRouter.post('/', function (req, res) {
     form.parse(req, function(err, fields, files) {
         if (err) {
           console.log(err);
-          res.fail(err);
+          res.sendStatus(400);
         }
         else{
           console.log(util.inspect({fields: fields, files: files}));
