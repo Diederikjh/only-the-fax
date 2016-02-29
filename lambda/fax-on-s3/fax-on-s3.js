@@ -21,6 +21,9 @@
 
 	    request({ url: "http://onlythefax-ocr-env.us-west-2.elasticbeanstalk.com/image-ocr",
         method: "POST",
+         headers: {
+		      "x-api-key":"TODO API KEY FOR OCR"
+		    },
         json: params
         }, function (error, response, body){
              if (!error && response.statusCode === 200) {
@@ -29,7 +32,7 @@
              else {
                  console.log("Error with data send to OCR");
                  console.log(response.statusCode);
-                 context.fail(error);
+                 context.sendStatus(500);
              }
              console.log(body);
         });

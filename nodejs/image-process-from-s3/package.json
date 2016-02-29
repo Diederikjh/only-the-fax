@@ -2,8 +2,8 @@
     "name": "node-api-djh-test",
     "main": "server.js",
     "dependencies": {
-        "express": "~4.0.0",
-        "body-parser": "~1.0.1",
+        "express": "~4.13.4",
+        "body-parser": "~1.9.2",
 	"aws-sdk": "~2.2.4",
 	"node-tesseract": "~0.2.7"
     }
