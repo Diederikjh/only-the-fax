@@ -140,7 +140,7 @@ imageProcessRouter.post('/', function (req, res) {
         res.json({message: 'Message received'});    
     }
     else {
-        req.sendStatus(400);
+        res.sendStatus(400);
     }
 
 });
