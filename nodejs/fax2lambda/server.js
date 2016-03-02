@@ -18,16 +18,21 @@ var port = process.env.PORT || 8080;        // set our port
 var faxReceiveRouter = express.Router();
 
 
-var validateReceivedMessage = function(fields, requestUrl, files, phaxioHeaderValue) {
+var validateReceivedMessage = function(fields, req, files, phaxioHeaderValue) {
+
+    var requestUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+    var hardCodedURL = 'http://onlythefax-env.us-west-2.elasticbeanstalk.com/fax-receive/';
 
     console.log('fields');
     console.log(fields);
     console.log('requestUrl');
     console.log(requestUrl);
+    console.log('hardCodedURL');
+    console.log(hardCodedURL);
     console.log('files');
     console.log(files);
-    console.log('phaxioHeaderValue')
-    console.log(phaxioHeaderValue)
+    console.log('phaxioHeaderValue');
+    console.log(phaxioHeaderValue);
     
     var names = [];
     for (var idx in fields) names.push(idx);
@@ -37,10 +42,10 @@ var validateReceivedMessage = function(fields, requestUrl, files, phaxioHeaderVa
         if (fields[names[idx]].length != 1) {
             console.warn("Not one field value for field name " + names[idx] );
         }
-        requestUrl += names[idx] + fields[names[idx]][0];
+        hardCodedURL += names[idx] + fields[names[idx]][0];
     }
 
-    console.log(requestUrl);
+    console.log(hardCodedURL);
 
     //sort the file parts and add their SHA1 sums to the URL
     var fileNames = [];
@@ -62,7 +67,7 @@ var validateReceivedMessage = function(fields, requestUrl, files, phaxioHeaderVa
     
     for (var idx = 0; idx < fileNames.length; idx++) {
         var fileSha1Hash = crypto.createHash('sha1').update(fs.readFileSync(fieldNamePaths[fileNames[idx]])).digest('hex');
-        requestUrl += fileNames[idx] + fileSha1Hash;
+        hardCodedURL += fileNames[idx] + fileSha1Hash;
     }
     
     var callbackToken = process.env.PHAXIO_CALLBACK_TOKEN;
@@ -95,7 +100,7 @@ faxReceiveRouter.post('/', function (req, res) {
           console.log(process.env);
           
           // Check that message received is from actual phaxio sender.
-          if (validateReceivedMessage(fields, req.url, files, req.headers["X-Phaxio-Signature"]))
+          if (validateReceivedMessage(fields, req, files, req.headers["X-Phaxio-Signature"]))
           {
               var jsonStringData = fields.fax[0];
               var faxData = JSON.parse(jsonStringData);
