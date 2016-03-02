@@ -1,2 +1,9 @@
 # Attach to running image, running bash.  (Get running iamge id from `docker ps`
 docker exec -i -t a91d1afe2a8e bash
+
+# Save current images as new version
+
+docker commit --message "Updated git source, express" stupefied_meitner diederikjh/faxit2me-ocr:v3
+
+# push to repo
+docker push diederikjh/faxit2me-fax2lambda:v4
