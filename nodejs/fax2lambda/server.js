@@ -17,7 +17,6 @@ var port = process.env.PORT || 8080;        // set our port
 
 var faxReceiveRouter = express.Router();
 
-
 var validateReceivedMessage = function(fields, req, files, phaxioHeaderValue) {
 
     // From http://stackoverflow.com/a/10185427/8524
@@ -86,11 +85,11 @@ var validateReceivedMessage = function(fields, req, files, phaxioHeaderValue) {
     
     var callbackToken = process.env.PHAXIO_CALLBACK_TOKEN;
 
+    var computedHash = crypto.createHmac('sha1', callbackToken).update(hashString).digest('hex'); 
     console.log('Computed hash');
-    console.log(crypto.createHmac('sha1', callbackToken).update(hashString).digest('hex'));
+    console.log(computedHash);
     
-    //TODO compare hash with header value
-    return true;
+    return computedHash === phaxioHeaderValue;
     
 };
 
@@ -110,11 +109,9 @@ faxReceiveRouter.post('/', function (req, res) {
           console.log("headers:");
           console.log(req.headers);
           
-          console.log("process.env");
-          console.log(process.env);
-          
           // Check that message received is from actual phaxio sender.
-          if (validateReceivedMessage(fields, req, files, req.headers["x-phaxio-signature"]))
+          var phaxioSignatureValue = 'x-phaxio-signature';
+          if (phaxioSignatureValue in req.headers && validateReceivedMessage(fields, req, files, req.headers[phaxioSignatureValue]))
           {
               var jsonStringData = fields.fax[0];
               var faxData = JSON.parse(jsonStringData);
