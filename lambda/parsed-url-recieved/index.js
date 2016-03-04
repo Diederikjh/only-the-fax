@@ -65,9 +65,12 @@ var sendResponseFax = function(newImage, context){
 };
 
 var sanitizeUrl = function(potentialUrl){
-    // Any chars (including newling) http replace with http
+    // Any chars (including newline) http replace with http
     potentialUrl = potentialUrl.replace(new RegExp("[\\s\\S]*http", "gm"), "http");
+    // Remove any whitespace
     potentialUrl = potentialUrl.replace(/\s/g, "");
+    // Replace | with l. Pretty |ame if you ask me
+    potentialUrl = potentialUrl.replace('|', 'l');
     return potentialUrl;
 };
 
