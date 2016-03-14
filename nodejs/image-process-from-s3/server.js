@@ -112,30 +112,37 @@ var imageProcessRouter = express.Router();
 imageProcessRouter.post('/', function (req, res) {
     console.log(JSON.stringify(req.body));
 
-    var bucketName = req.body.bucketName;
-    var imageKey = req.body.imageKey;
-    var filebasename = path.basename(imageKey);
-    var filepath = '/tmp/' + filebasename;
- 
-    var finish = function(){
-         console.log(filepath);
-         console.log("write finised successfully.");
-         imageReceived(filepath, imageKey);
+    var headerName = 'x-api-key';
+    if ( headerName in req.headers && req.headers[headerName] === process.env.OCR_API_KEY) {
+        var bucketName = req.body.bucketName;
+        var imageKey = req.body.imageKey;
+        var filebasename = path.basename(imageKey);
+        var filepath = '/tmp/' + filebasename;
+     
+        var finish = function() {
+             console.log(filepath);
+             console.log("write finised successfully.");
+             imageReceived(filepath, imageKey);
+        };
+    
+        var error = function(err) {
+             console.log("error writing stream");
+             console.log(err);
+        };
+    
+        var s3 = new AWS.S3();
+        var params = {Bucket: bucketName, Key: imageKey};
+
+        var file = require('fs').createWriteStream(filepath);
+        file.addListener('finish', finish);
+        file.addListener('error', error);
+        s3.getObject(params).createReadStream().pipe(file);
+        res.json({message: 'Message received'});    
+    }
+    else {
+        res.sendStatus(400);
     }
 
-    var error = function(err){
-         console.log("error writing stream");
-         console.log(err);
-    }
-
-    var s3 = new AWS.S3();
-    var params = {Bucket: bucketName, Key: imageKey};
-    // TODO use guid for filename to avoid clashes.
-    var file = require('fs').createWriteStream(filepath);
-    file.addListener('finish', finish);
-    file.addListener('error', error);
-    s3.getObject(params).createReadStream().pipe(file);
-    res.json({message: 'Message received'});
 });
 
 // more routes for our API will happen here

@@ -3,13 +3,12 @@ console.log('Loading function');
 var AWS = require('aws-sdk');   
 var streams = require('memory-streams');
 var request    = require("request");
-var api_keys = require("api_keys.js")
 
 var dynamo = new AWS.DynamoDB();
 var s3 = new AWS.S3();
     
 var optionallyAddField = function(attrName, fieldName, dataIn, dataOut, typeString) {
-    console.log(typeString)
+    console.log(typeString);
     if (fieldName in dataIn) {
         var attrValue = {};
         if (typeString == "N") {
@@ -29,7 +28,8 @@ var imageReceived = function(faxid, requested_at, buffer, downloadContentType, c
 
     var faxidString = faxid.toString();
     var dstKey = "thumbnails/" + requested_at + "_" + faxidString + "/" + faxidString + ".jpg";
-    console.log("Saving file `" + dstKey + "`");
+    console.log("Saving file `" + dstKey + "`"); 
+    console.log("length `" + buffer.length + "`");
 
     s3.putObject({
             Bucket: dstBucket,
@@ -51,18 +51,22 @@ var imageReceived = function(faxid, requested_at, buffer, downloadContentType, c
 // Download binary to image as per https://www.phaxio.com/docs/api/general/faxFile/
 var getThumbnailImage = function(faxid, requested_at, context)
 {
-    console.log("getThumbnailImage");
+    console.log("getThumbnailImage from phaxio");
     var phaxioFilePost = "https://api.phaxio.com/v1/faxFile";
    
-   var writer = new streams.WritableStream();
-   var downloadContentType = '';
-   request.post('https://api.phaxio.com/v1/faxFile', {
+    var writer = new streams.WritableStream();
+   
+    writer.on('finish', function(){
+        console.log('file downloaded finished');
+    });
+    
+    var downloadContentType = '';
+    request.post(phaxioFilePost, {
            form: {
                id: faxid,
                type: 'l',
-               api_key: api_keys.PHAXIO_API_KEY,
-               api_secret: api_keys.PHAXIO_API_SECRET
-
+               api_key:'TODO',
+               api_secret:'TODO'
            }
        }, function(err, res, body) {
            if (err) {
@@ -76,15 +80,27 @@ var getThumbnailImage = function(faxid, requested_at, context)
            console.log(response.statusCode);
            console.log(response.headers['content-type']);
            downloadContentType = response.headers['content-type'];
+           var len = parseInt(response.headers['content-length'], 10);
+           console.log("length in bytes");
+           console.log(len);
+       })
+       .on('data', function(chunk){
+          writer.write(chunk);
+          console.log('(data) chunk length');
+          console.log(chunk.length);
+       })
+       .on('end', function(){
+           console.log('end');
+           writer.end();
        })
        .on('error', function(err) {
            console.log('error');
            console.log(err);
-       })
-       .pipe(writer);
-    
+           context.fail(err);
+       });
+      
     console.log("requested post");
-}
+};
 
 exports.handler = function(event, context) {
     console.log('Received event:', JSON.stringify(event, null, 2));
@@ -109,7 +125,7 @@ exports.handler = function(event, context) {
     
     console.log('Save item:', JSON.stringify(item, null, 2));
     
-    dynamo.putItem({
+    /*dynamo.putItem({
         "TableName": "fax-received",
         "Item":item
     }, function(err, data) {
@@ -119,8 +135,11 @@ exports.handler = function(event, context) {
                 console.log('Dynamo Success: ' + JSON.stringify(data, null, '  '));
                 console.log('calling getThumbnailImage');
                 console.log('calling arg1 ' + event.id);
-                console.log('calling arg2 ' + context);
+                console.log('calling arg2 ' + requestDateAsString);
                 getThumbnailImage(event.id, requestDateAsString, context);
             }
-        });
+        });*/
+        
+    getThumbnailImage(event.id, requestDateAsString, context);
+        
 };
