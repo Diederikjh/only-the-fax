@@ -30,7 +30,6 @@ app.use(bodyParser.json());
 var port = process.env.PORT || 8080;        // set our port
 
 
-
 /* 
   By convention the file is stored in S3 bucket as
         thumbnails/<dynamoDb-range>_<dynamoDb-key>/image.jpg
@@ -139,7 +138,6 @@ imageProcessRouter.post('/', function (req, res) {
     }
 
 });
-
 
 var validateReceivedMessage = function(fields, req, files, phaxioHeaderValue) {
 
@@ -278,7 +276,7 @@ app.use('/fax-receive', faxReceiveRouter);
 // START THE SERVER
 // =============================================================================
 app.listen(port);
-console.log('Magic happens on port ' + port);
+console.log('Magic happens on port v5' + port);
 
 
 
