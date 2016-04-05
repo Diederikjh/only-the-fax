@@ -7,3 +7,7 @@ docker commit --message "Updated git source, express" stupefied_meitner diederik
 
 # push to repo
 docker push diederikjh/faxit2me-fax2lambda:v4
+
+
+# mount host folder into docker container 
+docker run -v /home/drbergie/work/faxit2me/only-the-fax/test\ images:/opt/images diederikjh/faxit2me-ocr:v4
