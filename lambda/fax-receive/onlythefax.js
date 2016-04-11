@@ -27,7 +27,7 @@ var imageReceived = function(faxid, requested_at, buffer, downloadContentType, c
     // TODO for better filename use https://www.npmjs.com/package/content-disposition
 
     var faxidString = faxid.toString();
-    var dstKey = "thumbnails/" + requested_at + "_" + faxidString + "/" + faxidString + ".jpg";
+    var dstKey = "fax-pdfs/" + requested_at + "_" + faxidString + "/" + faxidString + ".pdf";
     console.log("Saving file `" + dstKey + "`"); 
     console.log("length `" + buffer.length + "`");
 
@@ -48,6 +48,13 @@ var imageReceived = function(faxid, requested_at, buffer, downloadContentType, c
 
 };
 
+// From http://stackoverflow.com/a/14794066/8524
+var isInt = function (value) {
+  return !isNaN(value) && 
+         parseInt(Number(value)) == value && 
+         !isNaN(parseInt(value, 10));
+}
+
 // Download binary to image as per https://www.phaxio.com/docs/api/general/faxFile/
 var getThumbnailImage = function(faxid, requested_at, context)
 {
@@ -64,13 +71,14 @@ var getThumbnailImage = function(faxid, requested_at, context)
     request.post(phaxioFilePost, {
            form: {
                id: faxid,
-               type: 'l',
+               type: 'p',
                api_key:'TODO',
                api_secret:'TODO'
            }
        }, function(err, res, body) {
            if (err) {
-               context.fail(err);
+               console.log(err);
+               context.sendStatus(500);
            }
            else {
                imageReceived(faxid, requested_at, writer.toBuffer(), downloadContentType, context);
@@ -121,11 +129,13 @@ exports.handler = function(event, context) {
     optionallyAddField("phaxio-status", "status", event, item, "S");
     optionallyAddField("phaxio-num-pages", "num_pages", event, item, "N");
     optionallyAddField("phaxio-cost", "cost", event, item, "N");
-    optionallyAddField("phaxio-from-number", "from_number", event, item, "N");
+    if (isInt(event.from_number)) {
+        optionallyAddField("phaxio-from-number", "from_number", event, item, "N");
+    }
     
     console.log('Save item:', JSON.stringify(item, null, 2));
     
-    /*dynamo.putItem({
+    dynamo.putItem({
         "TableName": "fax-received",
         "Item":item
     }, function(err, data) {
@@ -138,8 +148,6 @@ exports.handler = function(event, context) {
                 console.log('calling arg2 ' + requestDateAsString);
                 getThumbnailImage(event.id, requestDateAsString, context);
             }
-        });*/
-        
-    getThumbnailImage(event.id, requestDateAsString, context);
+        });
         
 };

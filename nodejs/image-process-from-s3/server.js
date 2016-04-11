@@ -39,7 +39,7 @@ var port = process.env.PORT || 8080;        // set our port
 */
 var extractDynamoDBKeyFromImageKey = function(imageKey)
 {
-   var regex = /thumbnails\/(.*)\//
+   var regex = /.*\/(.*)\//
    var result = regex.exec(imageKey);
    if (result == null || result.length < 2){
        console.log("Image key " + imageKey + " doesn't match expected form");
