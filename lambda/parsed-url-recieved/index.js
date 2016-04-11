@@ -21,46 +21,54 @@ var parsedURLUpdated = function(dynamodbRecord) {
 var sendResponseFax = function(newImage, context){
     var parsedText = newImage.parsedText.S.trim();
     
-    parsedText = sanitizeUrl(parsedText);
+    parsedText= sanitizeUrl(parsedText);
     
-    var recipientNr = newImage['phaxio-from-number'].N.toString();
+    if ('phaxio-from-number' in newImage)
+    {
+        var recipientNr= newImage['phaxio-from-number'].N.toString();
+        
+        // Because startsWith is missing.:(
+        if (recipientNr.indexOf("+") != 0) {
+        recipientNr= "+" + recipientNr;
+        }
+        
+        console.log("sending fax of `" + parsedText + "` to " + recipientNr);
     
-    // Because startsWith is missing. :(
-    if (recipientNr.indexOf("+") != 0) {
-        recipientNr = "+" + recipientNr;
-    }
-    
-    console.log("sending fax of `" + parsedText + "` to " + recipientNr);
-
-    if (validUrl.isUri(parsedText)) {
-        if (newImage['phaxio-is-test'].BOOL == false) {
-            request.post('https://api.phaxio.com/v1/send', {
-                form: {
-                    to: recipientNr,
-                    string_data: parsedText,
-                    string_data_type: 'url',
-                    api_key: 'TODO PHAXIO_API_KEY',
-                    api_secret: 'TODO PHAXIO_API_SECRET'
-                }
-            }, function(err, res, body) {
-                if (err) {
-                    context.fail(err);
-                }
-                else {
-                    console.log(body);
-                    console.log("Successfully sent fax");
-                    context.succeed("Successfully sent fax");
-                }
-            });
+        if (validUrl.isUri(parsedText)) {
+        if (newImage['phaxio-is-test'].BOOL== false) {
+        request.post('https://api.phaxio.com/v1/send', {
+        form: {
+        to: recipientNr,
+        string_data: parsedText,
+        string_data_type: 'url',
+        api_key:'TODO PHAXIO_API_KEY',
+        api_secret:'TODO PHAXIO_API_SECRET'
+                    }
+                }, function(err, res, body) {
+                    if (err) {
+                        context.fail(err);
+                    }
+                    else {
+                        console.log(body);
+                        console.log("Successfully sent fax");
+                        context.succeed("Successfully sent fax");
+                    }
+                });
+            }
+            else {
+                console.log("Finished, but not sending fax as it is test");
+                context.succeed("Finished, but not sending fax as it is test");
+            }
         }
         else {
-            console.log("Finished, but not sending fax as it is test");
-            context.succeed("Finished, but not sending fax as it is test");
+            console.log("Text doesn't seem to be valid URI `" + parsedText + "`");
+            context.succeed("Text doesn't seem to be valid URI `" + parsedText + "`");
         }
     }
-    else {
-        console.log("Text doesn't seem to be valid URI `" + parsedText + "`");
-        context.succeed("Text doesn't seem to be valid URI `" + parsedText + "`");
+    else
+    {
+        console.log("No from number, can't send fax.");
+        context.succeed("No from number, can't send fax.");
     }
 };
 

@@ -49,7 +49,7 @@
 		var processedFilename = getProcessedFilename(tempFullFilename);
 		// TODO convert PDF to png.  from script: convert -density 300 -depth 8 -quality 85 $1[0] -resize 25% -sharpen 0x3.0 -crop 80%x80%+20%+20% -trim -fuzz 30%  $1_cropped.png
 		// add [0] for only first page of pdf
-		im.convert([tempFullFilename + "[0]", '-density','300', '-depth', '8', '-quality', '85', '-resize', '25%','-sharpen', '0x2.5', '-crop', '80%x80%+20%+20%', '-trim', '-fuzz', '30%', processedFilename], 
+		im.convert(['-density','300', '-depth', '8', '-quality', '85',tempFullFilename + "[0]", '-resize', '25%','-sharpen', '0x2.5', '-crop', '80%x80%+20%+20%', '-trim', '-fuzz', '30%', processedFilename], 
 			function(err, stdout){
 			  if (err) 
 			  {

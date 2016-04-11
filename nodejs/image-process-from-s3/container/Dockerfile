@@ -35,8 +35,6 @@ RUN apt-get install -y liblog-message-perl liblog-message-simple-perl liblsan0 l
 RUN curl -sL https://deb.nodesource.com/setup_0.12 | bash - 
 RUN apt-get install -y nodejs 
 
-#RUN apt-get curl
-#RUN curl -sL https://deb.nodesource.com/setup | bash -
 
 # Get repo
 RUN mkdir /src && \
