@@ -1,7 +1,0 @@
-django
-pytesseract   
-djangorestframework
-markdown
-django-filter
-celery
-django-celery

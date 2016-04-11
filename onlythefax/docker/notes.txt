@@ -1,2 +1,0 @@
-# run container with bash to debug
-docker run -it -v /home/ubuntu/git/only-the-fax:/opt/django/app  mbentley/django-uwsgi-nginx bash
