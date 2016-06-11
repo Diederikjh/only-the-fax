@@ -48,8 +48,12 @@
 		// use image magick to convert image for better OCR.
 		var processedFilename = getProcessedFilename(tempFullFilename);
 		// TODO convert PDF to png.  from script: convert -density 300 -depth 8 -quality 85 $1[0] -resize 25% -sharpen 0x3.0 -crop 80%x80%+20%+20% -trim -fuzz 30%  $1_cropped.png
-		// add [0] for only first page of pdf
-		im.convert(['-density','300', '-depth', '8', '-quality', '85',tempFullFilename + "[0]", '-sharpen', '0x2.5', '-trim', '-fuzz', '30%', 
+		// add [0] for only first page of pdf.
+		// Remove alpha layer to prevent tessarect getting confused with too many colours.
+		// Add border to ensure OCR does better job.
+		// Crop outside 5% on all sides to try and get rid of fax text noise
+		im.convert(['-density','300', '-depth', '8', '-quality', '85',tempFullFilename + "[0]", '-background', 'white', '-alpha', 'remove', '-gravity',
+		    'Center',  '-crop', '95%x95%+0+0', '-sharpen', '0x2.5', '-trim', '-fuzz', '30%', 
 		    '-bordercolor', 'none', '-border', '10%x10%', '-resize', '25%', processedFilename], 
 			function(err, stdout){
 			  if (err) 
