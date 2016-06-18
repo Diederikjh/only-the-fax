@@ -50,7 +50,7 @@
             "S": "This item has changed"
           },
           "parsedText": {"S":"google.com"},
-          "phaxio-from-number": {"S":"+27218801880"},
+          "phaxio-from-number": {"N":27218801880},
           "Id": {
             "N": "101"
           }
