@@ -28,7 +28,7 @@ theme = "hugo-creative-theme"
 
 	# Navigation
 	[params.navigation]
-		brand = "Fax time is now OTF"
+		brand = "Fax time is now: OTF"
 
 		[params.navigation.links]
 			about     = "About Us"
@@ -55,9 +55,8 @@ theme = "hugo-creative-theme"
 	[params.what]
 		headline = "What is this even"
  
-        bio1 = "Wait, did you say fax?  YES! FAX THE INTERNET!"
-        bio2 = "NOTE: Beta!"
-        bio3 = "Simply print out in clear legable font (60pt+) the URL you want to browse, and send it to 012 3456789 ((012) TODO TODO) and you will shortly thereafter receive a [webkit](https://webkit.org/) renderd version of that website.  Simple and clean."
+        bio1 = "Wait, did you say fax?  YES! FAX THE INTERNET! (NOTE: Beta!)"
+        bio2 = "Simply print out in clear legable font (60pt+) the URL you want to browse, and send it to 012 3456789 ((012) TODO TODO) and you will shortly thereafter receive a [webkit](https://webkit.org/) renderd version of that website.  Simple and clean."
 
         [[params.what.list]]
             icon = "fa-fax"
