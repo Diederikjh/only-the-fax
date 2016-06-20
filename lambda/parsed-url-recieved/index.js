@@ -21,7 +21,7 @@ var parsedURLUpdated = function(dynamodbRecord) {
 var sendResponseFax = function(newImage, context){
     var parsedText = newImage.parsedText.S.trim();
     
-    parsedText= sanitizeUrl(parsedText);
+    parsedText = sanitizeUrl(parsedText);
     
     if ('phaxio-from-number' in newImage)
     {
@@ -79,6 +79,23 @@ var sanitizeUrl = function(potentialUrl){
     potentialUrl = potentialUrl.replace(/\s/g, "");
     // Replace | with l. Pretty |ame if you ask me
     potentialUrl = potentialUrl.replace('|', 'l');
+    
+    // Replace http:ll or similar with http://
+    var httpProtocols = ["http", "https"];
+    for(var i in httpProtocols)
+    {
+        var protocol = httpProtocols[i];
+        potentialUrl = potentialUrl.replace(new RegExp(protocol + ":.{2}", "i"), protocol +"://");
+    }
+    
+    // Replace .coml with .com/
+    var topLevelDomains = ["com", "org","net", "za", "uk", "au", "biz", "guru", "gov", "mil", "mobi", "edu"];
+    for (i in topLevelDomains)
+    {
+        var tld = topLevelDomains[i];
+        potentialUrl = potentialUrl.replace(new RegExp("\\." + tld + ".{1}", "i"), "." + tld +"/");
+    }
+    
     return potentialUrl;
 };
 
