@@ -87,7 +87,7 @@ theme = "hugo-creative-theme"
             img = "img/IMG_20160309_094705_r.jpg"
 
     [[params.bestResults.list]]
-            item = "Always start URL with http or `https://` or `http://`."
+            item = "Always start URL with http or `https://` or `http://`"
     [[params.bestResults.list]]
             item = "Use a large font. White space is removed so, if your URL wraps it will still work."
     [[params.bestResults.list]]
@@ -102,7 +102,7 @@ theme = "hugo-creative-theme"
 [params.futurePlans]
             headline = "What about v2.0?"
 
-            f1 = "We have big ideas for the next release.  Circling a link with your pen, and sending the fax again, will follow a link.  Form entry for text fields (please don't send any passwords yet).  You Tube flip book support. And many many more exciting ideas."
+            f1 = "We have big ideas for the next release.  Circling a link with your pen, and sending the fax again, will follow a link.  Form entry for text fields (please don't send any passwords yet).  YouTube flip book support. And many many more exciting ideas."
             
 
     [params.useful]
