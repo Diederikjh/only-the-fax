@@ -1,0 +1,12 @@
+{{ "<!-- MONEY -->" | safeHTML }}
+<section class="bg-primary" id="money">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 text-center">
+                <h2 class="section-heading">{{ with .Site.Params.money.headline }}{{ . }}{{ end }}</h2>
+                <p class="text-faded">{{ with .Site.Params.money.m1 }}{{ . | markdownify }}{{ end }}</p>
+                <p >{{ with .Site.Params.money.m2 }}{{ . | markdownify }}{{ end }}</p>
+            </div>
+        </div>
+    </div>
+</section>

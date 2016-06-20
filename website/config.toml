@@ -33,6 +33,7 @@ theme = "hugo-creative-theme"
 		[params.navigation.links]
 			about     = "About Us"
 			what      = "What is this even"
+            useful    = "Useful?"
 
 
 	# Hero section
@@ -55,7 +56,8 @@ theme = "hugo-creative-theme"
 		headline = "What is this even"
  
         bio1 = "Wait, did you say fax?  YES! FAX THE INTERNET!"
-        bio2 = "Simply print out in clear legable font (60pt+) the URL you want to browse, and send it to 012 3456789 ((012) TODO TODO) and you will shortly thereafter receive a [webkit](https://webkit.org/) renderd version of that website.  Simple and clean."
+        bio2 = "NOTE: Beta!"
+        bio3 = "Simply print out in clear legable font (60pt+) the URL you want to browse, and send it to 012 3456789 ((012) TODO TODO) and you will shortly thereafter receive a [webkit](https://webkit.org/) renderd version of that website.  Simple and clean."
 
         [[params.what.list]]
             icon = "fa-fax"
@@ -71,6 +73,45 @@ theme = "hugo-creative-theme"
             icon = "fa-newspaper-o"
             title = "Easy"
             description = "Did I mention it was easy?"
+
+    [params.money]
+		    headline = "How does payment for this service work?"
+
+            m1 = "For the beta, we are going to try a honesty payment system. If you like this service, and or found it amusing. Please send 1 earth dollar per page or part thereof."
+            m2 = "Our service providers has informed us that \"love\" isn't an accepted form of payment to keep our business running."
+
+    [params.bestResults]
+            headline = "Follow these tips for best fax results:"
+
+            b1 = "Since the service relies heavily on magical unicorn based OCR please follow these guidelines for best internet fax results."
+            b2 = "Good example:"
+            img = "img/IMG_20160309_094705_r.jpg"
+
+    [[params.bestResults.list]]
+            item = "Always start URL with http or `https://` or `http://`."
+    [[params.bestResults.list]]
+            item = "Use a large font. White space is removed so, if your URL wraps it will still work."
+    [[params.bestResults.list]]
+            item = "No underlining of URLs."
+    [[params.bestResults.list]]
+            item = "Avoid trailing `/` at end of URL"
+
+            
+# TODO example
+
+
+[params.futurePlans]
+            headline = "What about v2.0?"
+
+            f1 = "We have big ideas for the next release.  Circling a link with your pen, and sending the fax again, will follow a link.  Form entry for text fields (please don't send any passwords yet).  You Tube flip book support. And many many more exciting ideas."
+            
+
+    [params.useful]
+		    headline = "Why not build something useful?"
+
+            u1 = "Why build something useful when you can build something exceptional?"
+            u2 = "This service was built with the help of people that build things that are very useful (and used by people) most days of the week. Some have described them as [quite a good](http://www.thefieldoffice.co.za/) company to work for.  They take their work seriously, but know how to party as well. Ain't no party like a fax party! [Eeee ooooooowwwowwowow](https://www.dialupsound.com/)!"
+
 
     # Portfolio modals
 	[params.portfolio.modal]
