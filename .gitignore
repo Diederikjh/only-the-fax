@@ -54,3 +54,6 @@ docs/_build/
 
 #DB file 
 db.sqlite3
+
+# Web output folder
+website/public/
