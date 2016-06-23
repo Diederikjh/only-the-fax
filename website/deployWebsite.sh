@@ -1,2 +1,4 @@
 #!/bin/bash
-aws s3 cp ./public/ s3://onlythefax.io/ --recursive --region us-west-2
+echo "Also building"
+./buildWebsite.sh
+aws s3 sync ./public/ s3://onlythefax.io/ --region us-west-2
