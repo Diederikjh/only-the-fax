@@ -1,0 +1,12 @@
+{{ "<!-- USEFUL -->" | safeHTML }}
+<section id="useful">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 text-center">
+                <h2 class="section-heading">{{ with .Site.Params.useful.headline }}{{ . }}{{ end }}</h2>
+                <p class="text">{{ with .Site.Params.useful.u1 }}{{ . | markdownify }}{{ end }}</p>
+                <p class="text">{{ with .Site.Params.useful.u2 }}{{ . | markdownify }}{{ end }}</p>
+            </div>
+        </div>
+    </div>
+</section>

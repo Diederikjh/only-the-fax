@@ -1,0 +1,19 @@
+{{ "<!-- BEST-RESULTS -->" | safeHTML }}
+<section id="best-results">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 text-center">
+                <h2 class="section-heading">{{ with .Site.Params.bestResults.headline }}{{ . }}{{ end }}</h2>
+                <p class="text">{{ with .Site.Params.bestResults.b1 }}{{ . | markdownify }}{{ end }}</p>
+                <ol >
+                {{ range .Site.Params.bestResults.list }}
+                    <li>{{ with .item }}{{ . | markdownify }}{{ end }}</li>
+                {{end}}
+                 </ol>
+
+                <p class="text">{{ with .Site.Params.bestResults.b2 }}{{ . | markdownify }}{{ end }}</p>
+                <img src="{{ .Site.BaseURL }}{{ .Site.Params.bestResults.img }}" />
+            </div>
+        </div>
+    </div>
+</section>
