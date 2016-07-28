@@ -266,17 +266,39 @@ faxReceiveRouter.post('/', function (req, res) {
     
 });
 
+var faxReceiveFromEmailRouter = express.Router();
+faxReceiveFromEmailRouter.post('/', function (req, res) {
+    
+     var form = new multiparty.Form({autoFiles:true});
+     
+      form.parse(req, function(err, fields, files) {
+          
+            if (err) {
+              console.log(err);
+              res.sendStatus(400);
+            }
+            else
+            {
+                   res.json({message:JSON.stringify(fields),
+                    files: JSON.stringify(files)
+                    });
+            }
+      });
+    
+});
+
 // more routes for our API will happen here
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
 app.use('/image-ocr', imageProcessRouter);
 app.use('/fax-receive', faxReceiveRouter);
+app.use('/fax-receive-from-email', faxReceiveFromEmailRouter);
 
 // START THE SERVER
 // =============================================================================
 app.listen(port);
-console.log('Magic happens on port v5' + port);
+console.log('Magic happens on port' + port);
 
 
 
