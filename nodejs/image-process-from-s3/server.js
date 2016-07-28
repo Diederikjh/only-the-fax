@@ -269,10 +269,10 @@ faxReceiveRouter.post('/', function (req, res) {
 
 var numberFromSubject = function(subjectString) {
     // look for first 10 digit number 
-    var words = subjectString.split(" ")
+    var words = subjectString.split(" ");
     
     // 10 digit number
-    var regex = /\d{10}/
+    var regex = /\d{10}/;
     for (var i in words) {
         var word = words[i];
         var result = regex.exec(word);
@@ -281,8 +281,8 @@ var numberFromSubject = function(subjectString) {
         }
     }
     
-    return null
-}
+    return null;
+};
 
 var getFirstPDFFileAttachment = function(files) {
     
@@ -320,7 +320,10 @@ faxReceiveFromEmailRouter.post('/', function (req, res) {
             }
             else
             {
-                var emailFrom = fields["From"];
+                console.log(JSON.stringify(fields));
+                console.log(JSON.stringify(files));
+                
+                var emailFrom = fields["From"][0];
                 // TODO verify from field is correct
                 if (!emailFrom.indexOf("faxfx.biz")) {
                     console.log("Email from doesn't match");
@@ -328,9 +331,9 @@ faxReceiveFromEmailRouter.post('/', function (req, res) {
                     res.sendStatus(400);
                 }
                 
-                var subject = fields["Subject"];
+                var subject = fields["Subject"][0];
                 var faxFromNumber = numberFromSubject(subject);
-                var timestamp = fields["timestamp"]
+                var timestamp = fields["timestamp"][0];
                 
                 var pdfFileAttachmentLocalPath = getFirstPDFFileAttachment(files);
                 
