@@ -288,15 +288,17 @@ var getFirstPDFFileAttachment = function(files) {
     
     var keys = Object.keys(files);
     
-    var regex = new RegExp(/.*\.pdf$/, "i");
+    var regex = new RegExp('.*\.pdf$', "i");
     
     for (var i in keys){
         
         var key = keys[i];
-        var attachment = files[key];
+        var attachment = files[key][0];
         
         var originalFilename = attachment["originalFilename"];
+        console.log(originalFilename);
         var matches = regex.exec(originalFilename)
+        console.log(matches);
         if (matches !== null) {
             return attachment["path"];
         }
