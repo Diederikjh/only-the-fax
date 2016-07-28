@@ -274,13 +274,13 @@ faxReceiveFromEmailRouter.post('/', function (req, res) {
       form.parse(req, function(err, fields, files) {
           
             if (err) {
-              console.log(err);
-              res.sendStatus(400);
+                  console.log(err);
+                  res.sendStatus(400);
             }
             else
             {
-                   res.json({message:JSON.stringify(fields),
-                    files: JSON.stringify(files)
+                   res.json({message:fields,
+                    files: files
                     });
             }
       });
