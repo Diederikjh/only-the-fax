@@ -266,6 +266,47 @@ faxReceiveRouter.post('/', function (req, res) {
     
 });
 
+
+var numberFromSubject = function(subjectString) {
+    // look for first 10 digit number 
+    words = subjectString.split(" ")
+    
+    // 10 digit number
+    var regex = /\d{10}/
+    for (var i in words) {
+        var word = words[i];
+        var result = regex.exec(imageKey);
+        if (result !== null && result.length != 0) {
+            return result[0];            
+        }
+    }
+    
+    return null
+}
+
+var getFirstPDFFileAttachment = function(files) {
+    
+    var keys = Object.keys(files);
+    
+    var regex = new RegExp(/.*\.pdf$/, "i");
+    
+    for (var i in keys){
+        
+        var key = keys[i];
+        var attachment = files[key];
+        
+        var originalFilename = attachment["originalFilename"];
+        var matches = regex.exec(originalFilename)
+        if (matches !== null) {
+            return attachment["path"];
+        }
+        
+    }
+    
+    return null;
+    
+}
+
 var faxReceiveFromEmailRouter = express.Router();
 faxReceiveFromEmailRouter.post('/', function (req, res) {
     
@@ -279,8 +320,25 @@ faxReceiveFromEmailRouter.post('/', function (req, res) {
             }
             else
             {
+                var emailFrom = fields["From"];
+                // TODO verify from field is correct
+                if (!emailFrom.indexOf("faxfx.biz")) {
+                    console.log("Email from doesn't match");
+                    console.log(emailFrom);
+                    res.sendStatus(400);
+                }
+                
+                var subject = fields["Subject"];
+                var faxFromNumber = numberFromSubject(subject);
+                var timestamp = fields["timestamp"]
+                
+                var pdfFileAttachmentLocalPath = getFirstPDFFileAttachment(files);
+                
                    res.json({message:fields,
-                    files: files
+                    files: files,
+                    fromNr: faxFromNumber,
+                    time: timestamp,
+                    pathToFile: pdfFileAttachmentLocalPath
                     });
             }
       });
