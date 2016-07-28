@@ -269,13 +269,13 @@ faxReceiveRouter.post('/', function (req, res) {
 
 var numberFromSubject = function(subjectString) {
     // look for first 10 digit number 
-    words = subjectString.split(" ")
+    var words = subjectString.split(" ")
     
     // 10 digit number
     var regex = /\d{10}/
     for (var i in words) {
         var word = words[i];
-        var result = regex.exec(imageKey);
+        var result = regex.exec(word);
         if (result !== null && result.length != 0) {
             return result[0];            
         }
