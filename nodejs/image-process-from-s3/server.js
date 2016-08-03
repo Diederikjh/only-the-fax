@@ -19,6 +19,9 @@ var AWS = require('aws-sdk');
 // Set your region for future requests.
 AWS.config.region = 'us-west-2';
 
+var dynamo = new AWS.DynamoDB();
+var s3 = new AWS.S3();
+
 var path = require('path');
 var tesseract = require('node-tesseract');
 
@@ -29,7 +32,6 @@ app.use(bodyParser.json());
 
 var port = process.env.PORT || 8080;        // set our port
 
-
 /* 
   By convention the file is stored in S3 bucket as
         thumbnails/<dynamoDb-range>_<dynamoDb-key>/image.jpg
@@ -39,14 +41,14 @@ var port = process.env.PORT || 8080;        // set our port
 */
 var extractDynamoDBKeyFromImageKey = function(imageKey)
 {
-   var regex = /.*\/(.*)\//
+   var regex = /.*\/(.*)\//;
    var result = regex.exec(imageKey);
-   if (result == null || result.length < 2){
+   if (result == null || result.length < 2) {
        console.log("Image key " + imageKey + " doesn't match expected form");
    }
    var rangeKey = result[1];
    return rangeKey.split("_");
-}
+};
 
 /* 
   expects an object that looks like this
@@ -62,7 +64,6 @@ var updateDynamoDb = function(dynamoDbKeyRange, text) {
 
     var range = dynamoDbKeyRange[0];
     var key = dynamoDbKeyRange[1];
-    var dynamo = new AWS.DynamoDB();
     
     var params = {
        TableName:"fax-received",
@@ -70,7 +71,7 @@ var updateDynamoDb = function(dynamoDbKeyRange, text) {
               "phaxio-requested-at":{"S":range  } },
        UpdateExpression : "SET parsedText = :text",
        ExpressionAttributeValues : { ":text": {"S":text} }
-    }
+    };
     dynamo.updateItem( params, function(err, data){
         if (err){
             console.log("failed to save dynamodb data");
@@ -82,7 +83,7 @@ var updateDynamoDb = function(dynamoDbKeyRange, text) {
             console.log(text);
         }
     });
-}
+};
 
 var imageReceived = function(filepath, imageKey) {
 
@@ -124,7 +125,6 @@ imageProcessRouter.post('/', function (req, res) {
              console.log(err);
         };
     
-        var s3 = new AWS.S3();
         var params = {Bucket: bucketName, Key: imageKey};
 
         var file = require('fs').createWriteStream(filepath);
@@ -309,6 +309,68 @@ var getFirstPDFFileAttachment = function(files) {
     
 }
 
+var dateStringFromTimestamp = function (timestamp){
+    var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+    d.setUTCSeconds(timestamp);
+    var timestampAsString = d.toISOString();
+    return timestampAsString;
+};
+
+var  saveMGFaxDynamoDB = function(subject, faxNumber, timestamp, pdfFileAttachmentLocalPath, res)
+{
+        var item = {
+            "received":{"S":dateStringFromTimestamp(timestamp)},
+            "subject":{"S":subject},
+            "faxNumber":{"S":faxNumber},
+        };
+        
+        dynamo.putItem({
+        "TableName": "fax-receive-mg",
+        "Item":item
+        }, function(err, data) {
+                if (err) {
+                    console.log("Faild to save mg email to dynamodb");
+                    console.log(err);
+                    res.sendStatus(500);
+                } else {
+                    console.log('Dynamo Success: ' + JSON.stringify(data, null, '  '));
+                    saveMGFaxToS3(pdfFileAttachmentLocalPath, timestamp ,res);
+                }
+            });
+};
+
+var saveMGFaxToS3 = function(filePath, timestamp,res) {
+    
+    var requestDateAsString = dateStringFromTimestamp(timestamp);
+    
+	var mime = require('mime');
+	var contentType = mime.lookup(filePath);
+	var body = fs.createReadStream(filePath);
+	
+	var filebasename = path.basename(filePath);
+	
+	var key = "fax-pdfs-mg/" + requestDateAsString + "/" + filebasename;
+	
+	s3.putObject({
+        Bucket: "com.onlythefax.images",
+        Key: key,
+        ContentType: contentType,
+        Body: body
+    },
+    function(err) {
+        if (err) {
+            console.log("Faild to save mg email to s3");
+        	console.log(err);
+            res.sendStatus(500);
+        }
+        else {
+            console.log('Saved pdf image data to s3');
+            res.sendStatus(200);
+        }
+    });
+    
+}
+
 var faxReceiveFromEmailRouter = express.Router();
 faxReceiveFromEmailRouter.post('/', function (req, res) {
     
@@ -334,17 +396,25 @@ faxReceiveFromEmailRouter.post('/', function (req, res) {
                 }
                 
                 var subject = fields["Subject"][0];
-                var faxFromNumber = numberFromSubject(subject);
+                var faxNumber = numberFromSubject(subject);
                 var timestamp = fields["timestamp"][0];
                 
                 var pdfFileAttachmentLocalPath = getFirstPDFFileAttachment(files);
                 
-                   res.json({message:fields,
-                    files: files,
-                    fromNr: faxFromNumber,
-                    time: timestamp,
-                    pathToFile: pdfFileAttachmentLocalPath
-                    });
+                saveMGFaxDynamoDB(subject, faxNumber, timestamp, pdfFileAttachmentLocalPath, res);
+                
+                // res.json({message:fields,
+                //     files: files,
+                //     fromNr: faxNumber,
+                //     time: timestamp,
+                //     pathToFile: pdfFileAttachmentLocalPath
+                // });
+                
+                // TODO put image in seperate bucket.
+                // Save incomming data to dynamo db.
+                // Change API to also send dynamo db table and Keys where to write parsed text.
+                // Add lambda to send outgoing fax on change of that dynamo db field.
+                
             }
       });
     
