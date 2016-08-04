@@ -3,7 +3,7 @@
   "containerDefinitions": [
     {
       "name": "fax-ocr",
-      "image": "diederikjh/faxit2me-ocr:v10",
+      "image": "diederikjh/faxit2me-ocr:v12",
       "essential": true,
       "memory": 256,
       "portMappings": [
