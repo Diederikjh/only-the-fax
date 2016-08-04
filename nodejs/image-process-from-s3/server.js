@@ -59,21 +59,47 @@ var extractDynamoDBKeyFromImageKey = function(imageKey)
 
 */
 
-var updateDynamoDb = function(dynamoDbKeyRange, text) {
-    console.log("saving " + dynamoDbKeyRange + " and " + text + " to db ");
-
-    var range = dynamoDbKeyRange[0];
-    var key = dynamoDbKeyRange[1];
+var updateDynamoDb = function(imageKey, text) {
+    console.log("saving " + imageKey + " and " + text + " to db ");
+    var faxProvider = "";
+    if (imageKey.indexOf("fax-pdfs/") == 0)
+    {
+        faxProvider = "phaxio";
+    }
+    else if (imageKey.indexOf("fax-pdfs-mg/") == 0)
+    {
+        faxProvider = "mg";
+    }
+    
+    var tableName = "";
+    var key = {};
+    
+    if (faxProvider == "phaxio")
+    {
+        tableName = "fax-received";
+        var dynamoDbKeyRange = extractDynamoDBKeyFromImageKey(imageKey);
+    
+        var range = dynamoDbKeyRange[0];
+        var phaxioKey = dynamoDbKeyRange[1];
+    
+        key = { "phaxio-id":{"N":phaxioKey},
+              "phaxio-requested-at":{"S":range  } };
+    }
+    else if (faxProvider == "mg")
+    {
+        //tODO wire up change event for this dynamodb table
+        tableName = "fax-receive-mg";
+        key = { "receive":{"S": imageKey.split("/")[1]} };
+    }
     
     var params = {
-       TableName:"fax-received",
-       Key: { "phaxio-id":{"N":key},
-              "phaxio-requested-at":{"S":range  } },
+       TableName:tableName,
+       Key: key,
        UpdateExpression : "SET parsedText = :text",
        ExpressionAttributeValues : { ":text": {"S":text} }
     };
     dynamo.updateItem( params, function(err, data){
-        if (err){
+        if (err) {
             console.log("failed to save dynamodb data");
             console.log(err);
         }
@@ -96,7 +122,7 @@ var imageReceived = function(filepath, imageKey) {
               console.log("Found text");
               console.log(text);
               
-              updateDynamoDb(extractDynamoDBKeyFromImageKey(imageKey), text);
+              updateDynamoDb(imageKey, text);
           }
 
     });
@@ -297,7 +323,7 @@ var getFirstPDFFileAttachment = function(files) {
         
         var originalFilename = attachment["originalFilename"];
         console.log(originalFilename);
-        var matches = regex.exec(originalFilename)
+        var matches = regex.exec(originalFilename);
         console.log(matches);
         if (matches !== null) {
             return attachment["path"];
@@ -307,9 +333,9 @@ var getFirstPDFFileAttachment = function(files) {
     
     return null;
     
-}
+};
 
-var dateStringFromTimestamp = function (timestamp){
+var dateStringFromTimestamp = function (timestamp) {
     var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
     d.setUTCSeconds(timestamp);
     var timestampAsString = d.toISOString();
@@ -369,7 +395,7 @@ var saveMGFaxToS3 = function(filePath, timestamp,res) {
         }
     });
     
-}
+};
 
 var faxReceiveFromEmailRouter = express.Router();
 faxReceiveFromEmailRouter.post('/', function (req, res) {
@@ -431,6 +457,9 @@ app.use('/fax-receive-from-email', faxReceiveFromEmailRouter);
 // START THE SERVER
 // =============================================================================
 app.listen(port);
+
+var i = require("./imports.js");
+console.log (i.testVar);
 console.log('Magic happens on port' + port);
 
 
