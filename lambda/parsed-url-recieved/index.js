@@ -34,6 +34,8 @@ var sendResponseFax = function(newImage, context){
         
         console.log("sending fax of `" + parsedText + "` to " + recipientNr);
     
+        var keys = require("./api_keys.js");
+    
         if (validUrl.isUri(parsedText)) {
         if (newImage['phaxio-is-test'].BOOL== false) {
         request.post('https://api.phaxio.com/v1/send', {
@@ -41,8 +43,8 @@ var sendResponseFax = function(newImage, context){
         to: recipientNr,
         string_data: parsedText,
         string_data_type: 'url',
-        api_key:'TODO PHAXIO_API_KEY',
-        api_secret:'TODO PHAXIO_API_SECRET'
+        api_key:keys.PHAXIO_API_KEY,
+        api_secret:keys.PHAXIO_API_SECRET
                     }
                 }, function(err, res, body) {
                     if (err) {
@@ -75,10 +77,11 @@ var sendResponseFax = function(newImage, context){
 var sanitizeUrl = function(potentialUrl){
     // Any chars (including newline) http replace with http
     potentialUrl = potentialUrl.replace(new RegExp("[\\s\\S]*http", "gm"), "http");
+    // Replace all: http://stackoverflow.com/a/1144788/8524
     // Remove any whitespace
     potentialUrl = potentialUrl.replace(/\s/g, "");
     // Replace | with l. Pretty |ame if you ask me
-    potentialUrl = potentialUrl.replace('|', 'l');
+    potentialUrl = potentialUrl.replace(/\|/g, 'l');
     
     // Replace http:ll or similar with http://
     var httpProtocols = ["http", "https"];
