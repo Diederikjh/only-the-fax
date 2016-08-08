@@ -399,50 +399,63 @@ var saveMGFaxToS3 = function(filePath, timestamp,res) {
 
 var faxReceiveFromEmailRouter = express.Router();
 faxReceiveFromEmailRouter.post('/', function (req, res) {
-    
-     var form = new multiparty.Form({autoFiles:true});
-     
-      form.parse(req, function(err, fields, files) {
-          
-            if (err) {
-                  console.log(err);
-                  res.sendStatus(400);
-            }
-            else
-            {
-                console.log(JSON.stringify(fields));
-                console.log(JSON.stringify(files));
-                
-                var emailFrom = fields["From"][0];
-                // TODO verify from field is correct
-                if (!emailFrom.indexOf("faxfx.biz")) {
-                    console.log("Email from doesn't match");
-                    console.log(emailFrom);
-                    res.sendStatus(400);
-                }
-                
-                var subject = fields["Subject"][0];
-                var faxNumber = numberFromSubject(subject);
-                var timestamp = fields["timestamp"][0];
-                
-                var pdfFileAttachmentLocalPath = getFirstPDFFileAttachment(files);
-                
-                saveMGFaxDynamoDB(subject, faxNumber, timestamp, pdfFileAttachmentLocalPath, res);
-                
-                // res.json({message:fields,
-                //     files: files,
-                //     fromNr: faxNumber,
-                //     time: timestamp,
-                //     pathToFile: pdfFileAttachmentLocalPath
-                // });
-                
-                // TODO put image in seperate bucket.
-                // Save incomming data to dynamo db.
-                // Change API to also send dynamo db table and Keys where to write parsed text.
-                // Add lambda to send outgoing fax on change of that dynamo db field.
-                
-            }
-      });
+
+     console.log(req.headers);
+     var contentType = req.get('content-type');
+     console.log(contentType);
+
+     if (contentType.indexOf('multipart/form-data') == 0)
+     {
+	     var form = new multiparty.Form({autoFiles:true});
+	     
+	     form.parse(req, function(err, fields, files) {
+		  
+	    if (err) {
+		  console.log(err);
+		  res.sendStatus(400);
+	    }
+	    else
+	    {
+		console.log(JSON.stringify(fields));
+		console.log(JSON.stringify(files));
+		
+		var emailFrom = fields["From"][0];
+		// TODO verify from field is correct
+		if (!emailFrom.indexOf("faxfx.biz")) {
+		    console.log("Email from doesn't match");
+		    console.log(emailFrom);
+		    //ress.sendStatus(400);
+		    res.sendStatus(200);
+		}
+		
+		var subject = fields["Subject"][0];
+		var faxNumber = numberFromSubject(subject);
+		var timestamp = fields["timestamp"][0];
+		
+		var pdfFileAttachmentLocalPath = getFirstPDFFileAttachment(files);
+		
+    //            saveMGFaxDynamoDB(subject, faxNumber, timestamp, pdfFileAttachmentLocalPath, res);
+		
+		 res.json({message:fields,
+		    files: files,
+		     fromNr: faxNumber,
+		     time: timestamp,
+		     pathToFile: pdfFileAttachmentLocalPath
+		 });
+		
+		// TODO put image in seperate bucket.
+		// Save incomming data to dynamo db.
+		// Change API to also send dynamo db table and Keys where to write parsed text.
+		// Add lambda to send outgoing fax on change of that dynamo db field.
+		
+	    }
+	      });
+	}
+	else
+	{
+		console.log("Content type not supported " + contentType);
+		res.sendStatus(200);
+	}
     
 });
 
