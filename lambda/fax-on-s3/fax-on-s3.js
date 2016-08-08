@@ -1,3 +1,5 @@
+// TODO this can be resued for mail gun pdf bucket as well -  still to wire up s3 change event.
+
 	console.log('Loading function');
 
 	var aws = require('aws-sdk');
@@ -54,7 +56,7 @@
 		// Crop outside 5% on all sides to try and get rid of fax text noise
 		im.convert(['-density','300', '-depth', '8', '-quality', '85',tempFullFilename + "[0]", '-background', 'white', '-alpha', 'remove', '-gravity',
 		    'Center',  '-crop', '95%x95%+0+0', '-sharpen', '0x2.5', '-trim', '-fuzz', '30%', 
-		    '-bordercolor', 'none', '-border', '10%x10%', '-resize', '25%', processedFilename], 
+		    '-bordercolor', 'white', '-border', '20%x60%', '-resize', '25%', processedFilename], 
 			function(err, stdout){
 			  if (err) 
 			  {
@@ -109,10 +111,12 @@
 		var dataAsString = JSON.stringify(params);
 		console.log(dataAsString);
 
+		var keys = require("./api_keys.js");
+
 	    request({ url: "http://onlythefax-ocr-env.us-west-2.elasticbeanstalk.com/image-ocr",
         method: "POST",
          headers: {
- 			     "x-api-key":"TODO API KEY FOR OCR"
+ 			     "x-api-key":keys.OCR_KEY
 		    },
         json: params
         }, function (error, response, body){

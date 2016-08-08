@@ -67,13 +67,15 @@ var getThumbnailImage = function(faxid, requested_at, context)
         console.log('file downloaded finished');
     });
     
+    var keys = require("./api_keys.js");
+    
     var downloadContentType = '';
     request.post(phaxioFilePost, {
            form: {
                id: faxid,
                type: 'p',
-               api_key:'TODO',
-               api_secret:'TODO'
+               api_key:keys.PHAXIO_API_KEY,
+               api_secret:keys.PHAXIO_API_SECRET
            }
        }, function(err, res, body) {
            if (err) {
