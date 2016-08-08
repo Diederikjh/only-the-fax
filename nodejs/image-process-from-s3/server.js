@@ -322,9 +322,7 @@ var getFirstPDFFileAttachment = function(files) {
         var attachment = files[key][0];
         
         var originalFilename = attachment["originalFilename"];
-        console.log(originalFilename);
         var matches = regex.exec(originalFilename);
-        console.log(matches);
         if (matches !== null) {
             return attachment["path"];
         }
@@ -342,10 +340,11 @@ var dateStringFromTimestamp = function (timestamp) {
     return timestampAsString;
 };
 
-var  saveMGFaxDynamoDB = function(subject, faxNumber, timestamp, pdfFileAttachmentLocalPath, res)
+var saveMGFaxDynamoDB = function(subject, faxNumber, timestamp, token, pdfFileAttachmentLocalPath, res)
 {
         var item = {
             "received":{"S":dateStringFromTimestamp(timestamp)},
+	    "token" : {"S":token},
             "subject":{"S":subject},
             "faxNumber":{"S":faxNumber},
         };
@@ -386,7 +385,7 @@ var saveMGFaxToS3 = function(filePath, timestamp,res) {
     function(err) {
         if (err) {
             console.log("Faild to save mg email to s3");
-        	console.log(err);
+            console.log(err);
             res.sendStatus(500);
         }
         else {
@@ -400,7 +399,6 @@ var saveMGFaxToS3 = function(filePath, timestamp,res) {
 var faxReceiveFromEmailRouter = express.Router();
 faxReceiveFromEmailRouter.post('/', function (req, res) {
 
-     console.log(req.headers);
      var contentType = req.get('content-type');
      console.log(contentType);
 
@@ -410,45 +408,57 @@ faxReceiveFromEmailRouter.post('/', function (req, res) {
 	     
 	     form.parse(req, function(err, fields, files) {
 		  
-	    if (err) {
-		  console.log(err);
-		  res.sendStatus(400);
-	    }
-	    else
-	    {
-		console.log(JSON.stringify(fields));
-		console.log(JSON.stringify(files));
-		
-		var emailFrom = fields["From"][0];
-		// TODO verify from field is correct
-		if (!emailFrom.indexOf("faxfx.biz")) {
-		    console.log("Email from doesn't match");
-		    console.log(emailFrom);
-		    //ress.sendStatus(400);
-		    res.sendStatus(200);
-		}
-		
-		var subject = fields["Subject"][0];
-		var faxNumber = numberFromSubject(subject);
-		var timestamp = fields["timestamp"][0];
-		
-		var pdfFileAttachmentLocalPath = getFirstPDFFileAttachment(files);
-		
-    //            saveMGFaxDynamoDB(subject, faxNumber, timestamp, pdfFileAttachmentLocalPath, res);
-		
-		 res.json({message:fields,
-		    files: files,
-		     fromNr: faxNumber,
-		     time: timestamp,
-		     pathToFile: pdfFileAttachmentLocalPath
-		 });
-		
-		// TODO put image in seperate bucket.
-		// Save incomming data to dynamo db.
-		// Change API to also send dynamo db table and Keys where to write parsed text.
-		// Add lambda to send outgoing fax on change of that dynamo db field.
-		
-	    }
+		    if (err) {
+			  console.log(err);
+			  res.sendStatus(400);
+		    }
+		    else
+		    {
+			console.log("Parsed");
+			console.log(JSON.stringify(fields));
+			console.log(JSON.stringify(files));
+			
+			// TODO verify from field is correct
+			/*if (emailFrom.indexOf("faxfx.biz") < 0) {
+			    console.log("Email from doesn't match");
+			    console.log(emailFrom);
+			    ress.sendStatus(400);
+			}*/
+			
+			var subject = fields["Subject"][0];
+			var faxNumber = numberFromSubject(subject);
+			var timestamp = fields["timestamp"][0];
+			var token = fields["token"][0];
+			
+			var pdfFileAttachmentLocalPath = getFirstPDFFileAttachment(files);
+
+			if (faxNumber != null && pdfFileAttachmentLocalPath != null) {	
+	                	saveMGFaxDynamoDB(subject, faxNumber, timestamp, token, pdfFileAttachmentLocalPath, res);
+			}
+			else
+			{
+			
+				var r = {message:fields,
+				    files: files,
+				     fromNr: faxNumber,
+				     time: timestamp,
+				     pathToFile: pdfFileAttachmentLocalPath
+				 };
+				//console.log(JSON.stringify(r));
+
+				var dateString = dateStringFromTimestamp(timestamp);
+				console.log(dateString);
+				console.log(pdfFileAttachmentLocalPath);
+
+				 res.json(r);
+				
+				// TODO put image in seperate bucket.
+				// Save incomming data to dynamo db.
+				// Change API to also send dynamo db table and Keys where to write parsed text.
+				// Add lambda to send outgoing fax on change of that dynamo db field.
+			}
+			
+		    }
 	      });
 	}
 	else
