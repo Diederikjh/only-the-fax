@@ -73,11 +73,13 @@ var updateDynamoDb = function(imageKey, text) {
     
     var tableName = "";
     var key = {};
+
+    var dynamoDbKeyRange = extractDynamoDBKeyFromImageKey(imageKey);
     
     if (faxProvider == "phaxio")
     {
         tableName = "fax-received";
-        var dynamoDbKeyRange = extractDynamoDBKeyFromImageKey(imageKey);
+
     
         var range = dynamoDbKeyRange[0];
         var phaxioKey = dynamoDbKeyRange[1];
@@ -87,9 +89,13 @@ var updateDynamoDb = function(imageKey, text) {
     }
     else if (faxProvider == "mg")
     {
-        //tODO wire up change event for this dynamodb table
         tableName = "fax-receive-mg";
-        key = { "receive":{"S": imageKey.split("/")[1]} };
+        
+        var received = dynamoDbKeyRange[0];
+        var token = dynamoDbKeyRange[1];
+        
+        key = { "receive":{"S": received },
+         "token": {"S": token}};
     }
     
     var params = {
