@@ -294,6 +294,7 @@ faxReceiveRouter.post('/', function (req, res) {
 
 
 var numberFromSubject = function(subjectString) {
+    // TODO add support for nubmers of the format 27866000476
     // look for first 10 digit number 
     var words = subjectString.split(" ");
     
@@ -340,13 +341,15 @@ var dateStringFromTimestamp = function (timestamp) {
     return timestampAsString;
 };
 
-var saveMGFaxDynamoDB = function(subject, faxNumber, timestamp, token, pdfFileAttachmentLocalPath, res)
+var saveMGFaxDynamoDB = function(subject, faxNumber, timestamp, token, sender, body, pdfFileAttachmentLocalPath, res)
 {
         var item = {
             "received":{"S":dateStringFromTimestamp(timestamp)},
 	    "token" : {"S":token},
             "subject":{"S":subject},
             "faxNumber":{"S":faxNumber},
+            "sender" : {"S":sender},
+            "body" : {"S":body}
         };
         
         dynamo.putItem({
@@ -418,22 +421,24 @@ faxReceiveFromEmailRouter.post('/', function (req, res) {
 			console.log(JSON.stringify(fields));
 			console.log(JSON.stringify(files));
 			
-			// TODO verify from field is correct
+			// TODO verify from field is correct. Not sure this is 100% right place. What about email send/receive use case
 			/*if (emailFrom.indexOf("faxfx.biz") < 0) {
 			    console.log("Email from doesn't match");
 			    console.log(emailFrom);
 			    ress.sendStatus(400);
 			}*/
 			
+			var sender = fields["sender"][0];
 			var subject = fields["Subject"][0];
 			var faxNumber = numberFromSubject(subject);
 			var timestamp = fields["timestamp"][0];
 			var token = fields["token"][0];
+			var body = fields["stripped-text"][0];
 			
 			var pdfFileAttachmentLocalPath = getFirstPDFFileAttachment(files);
 
 			if (faxNumber != null && pdfFileAttachmentLocalPath != null) {	
-	                	saveMGFaxDynamoDB(subject, faxNumber, timestamp, token, pdfFileAttachmentLocalPath, res);
+	                	saveMGFaxDynamoDB(subject, faxNumber, timestamp, token, sender, body, pdfFileAttachmentLocalPath, res);
 			}
 			else
 			{
