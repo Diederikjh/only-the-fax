@@ -94,8 +94,8 @@ var updateDynamoDb = function(imageKey, text) {
         var received = dynamoDbKeyRange[0];
         var token = dynamoDbKeyRange[1];
         
-        key = { "receive":{"S": received },
-         "token": {"S": token}};
+        key = { "received":{"S": received },
+           "token": {"S": token}};
     }
     
     var params = {
