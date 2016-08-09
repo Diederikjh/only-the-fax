@@ -292,7 +292,6 @@ faxReceiveRouter.post('/', function (req, res) {
     
 });
 
-
 var numberFromSubject = function(subjectString) {
     // TODO add support for nubmers of the format 27866000476
     // look for first 10 digit number 
@@ -362,12 +361,12 @@ var saveMGFaxDynamoDB = function(subject, faxNumber, timestamp, token, sender, b
                     res.sendStatus(500);
                 } else {
                     console.log('Dynamo Success: ' + JSON.stringify(data, null, '  '));
-                    saveMGFaxToS3(pdfFileAttachmentLocalPath, timestamp ,res);
+                    saveMGFaxToS3(pdfFileAttachmentLocalPath, timestamp, token, res);
                 }
             });
 };
 
-var saveMGFaxToS3 = function(filePath, timestamp,res) {
+var saveMGFaxToS3 = function(filePath, timestamp, token, res) {
     
     var requestDateAsString = dateStringFromTimestamp(timestamp);
     
@@ -377,7 +376,7 @@ var saveMGFaxToS3 = function(filePath, timestamp,res) {
 	
 	var filebasename = path.basename(filePath);
 	
-	var key = "fax-pdfs-mg/" + requestDateAsString + "/" + filebasename;
+	var key = "fax-pdfs-mg/" + requestDateAsString + "_" + token + "/" + filebasename;
 	
 	s3.putObject({
         Bucket: "com.onlythefax.images",
@@ -438,7 +437,7 @@ faxReceiveFromEmailRouter.post('/', function (req, res) {
 			var pdfFileAttachmentLocalPath = getFirstPDFFileAttachment(files);
 
 			if (faxNumber != null && pdfFileAttachmentLocalPath != null) {	
-	                	saveMGFaxDynamoDB(subject, faxNumber, timestamp, token, sender, body, pdfFileAttachmentLocalPath, res);
+	              saveMGFaxDynamoDB(subject, faxNumber, timestamp, token, sender, body, pdfFileAttachmentLocalPath, res);
 			}
 			else
 			{
