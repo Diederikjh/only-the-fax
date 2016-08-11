@@ -92,7 +92,7 @@ var sanitizeUrl = function(potentialUrl){
     }
     
     // Replace .coml with .com/
-    var topLevelDomains = ["com", "org","net", "za", "uk", "au", "biz", "guru", "gov", "mil", "mobi", "edu"];
+    var topLevelDomains = ["com", "org","net", "za", "uk", "au", "biz", "guru", "gov", "mil", "mobi", "edu", "io", "us"];
     for (i in topLevelDomains)
     {
         var tld = topLevelDomains[i];
