@@ -8,6 +8,7 @@ var fs = require('fs');
 
 var aws = require('aws-sdk');
 var s3 = new aws.S3({ apiVersion: '2006-03-01' });
+var path = require('path');
 
 // TODO fix duplication
 var parsedURLUpdated = function(dynamodbRecord) {
@@ -62,7 +63,6 @@ var sanitizeUrl = function(potentialUrl){
 var uploadPathToS3 = function(outputFilePath, received, token, callback) {
     
 	var mime = require('mime');
-	var path = require('path');
 	var contentType = mime.lookup(outputFilePath);
 	var body = fs.createReadStream(outputFilePath);
 	
@@ -104,17 +104,19 @@ var generatePDFURLImage = function(newImage, keys, callback){
 		fs.mkdirSync(tempFilesDirPath);
 	}
     
-    var outputFilePath = tempFilesDirPath + '/page.jpeg';
-    
+    var outputFilePath = tempFilesDirPath + '/page.pdf';
+
     phantom.create().then(function(ph) {
         ph.createPage().then(function(page) {
-            page.open("parsedText").then(function(status) {
+           page.property('paperSize', { format: 'A4', orientation: 'portrait', border: '1cm' }).then(function() {
+               page.open(parsedText).then(function(status) {
                 page.render(outputFilePath).then(function() {
                     console.log('Page Rendered');
                     ph.exit();
                     uploadPathToS3(outputFilePath, keys.received.S, keys.token.S, callback);
                 });
-            });
+              });
+           });
         });
     });
     

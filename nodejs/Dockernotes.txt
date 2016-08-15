@@ -15,3 +15,10 @@ docker push diederikjh/faxit2me-fax2lambda:v4
 
 # mount host folder into docker container 
 docker run -v /home/drbergie/work/faxit2me/only-the-fax/test\ images:/opt/images diederikjh/faxit2me-ocr:v4
+
+#Fix for dev broken docker deamon:
+#Get http:///var/run/docker.sock/v1.19/images/json: dial unix /var/run/docker.sock: no such file or directory. Are you trying to connect to a TLS-enabled daemon without TLS?
+sudo docker -d --exec-opt native.cgroupdriver=cgroupfs
+
+
+sudo ssh -i ~/.ssh/authorized_keysfolder/keypair.pem ubuntu@ec2-xxx-xxx-xxx-xxx.us-west-2.compute.amazonaws.com
