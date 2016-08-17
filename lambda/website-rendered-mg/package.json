@@ -1,0 +1,7 @@
+{
+    "name": "website-rendered-mg",
+    "main": "website-rendered-mg.js",
+    "dependencies": {
+        "request": "~2.74.0"
+    }
+}
