@@ -1,0 +1,16 @@
+{
+  "Records": [
+      {
+      "s3": {
+        "bucket": {
+          "name": "com.onlythefax.images",
+        },
+         "object": {
+          "key": "thumbnails/2016-03-09T10:10:24.000Z_22790301/22790301.jpg",
+          "size": 1024
+        },
+        "s3SchemaVersion": "1.0"
+      },
+      "eventSource": "aws:s3" }
+  ]
+}

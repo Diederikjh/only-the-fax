@@ -1,7 +1,6 @@
 'use strict';
 console.log('Loading function');
 
-
 var aws = require('aws-sdk');
 var s3 = new aws.S3({ apiVersion: '2006-03-01' });
 var path = require("path");
@@ -47,13 +46,14 @@ var sendFax = (faxNumber, tempFullFilename, callback) => {
     console.log("Sending fax started");
     
     var toEmail = getEmailFromNumber(faxNumber);
-    var keys = require('./apk_keys.js');
+    var keys = require('./api_keys.js');
     
     var formData = {
           from: 'Fax User <' + keys.MG_EMAIL + '>',
           to : toEmail,
           cc: keys.CC_EMAIL,
           subject: faxNumber,
+          text: " ", // <--- no body otherwise that becomes "cover letter"
           attachment: fs.createReadStream(tempFullFilename)
     };
     
@@ -105,12 +105,6 @@ var imageDownloaded = (tempFullFilename, key, callback) => {
           sendFax(faxNumber, tempFullFilename, callback);
       }
   });
-  
-  // TODO use request lib form data to post to mail gun with valid attachement (sending it to fax service for outgoing fax)
-  
-  // https://github.com/request/request#forms
-  
-  
     
 };
 
@@ -169,36 +163,4 @@ exports.handler = (event, context, callback) => {
 
         });
 
-    	
-    /*const operation = event.operation;
-
-    if (event.tableName) {
-        event.payload.TableName = event.tableName;
-    }
-
-    switch (operation) {
-        case 'create':
-            dynamo.putItem(event.payload, callback);
-            break;
-        case 'read':
-            dynamo.getItem(event.payload, callback);
-            break;
-        case 'update':
-            dynamo.updateItem(event.payload, callback);
-            break;
-        case 'delete':
-            dynamo.deleteItem(event.payload, callback);
-            break;
-        case 'list':
-            dynamo.scan(event.payload, callback);
-            break;
-        case 'echo':
-            callback(null, event.payload);
-            break;
-        case 'ping':
-            callback(null, 'pong');
-            break;
-        default:
-            callback(new Error(`Unrecognized operation "${operation}"`));
-    }*/
 };
