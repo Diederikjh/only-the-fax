@@ -171,9 +171,9 @@ exports.handler = (event, context, callback) => {
 
         event.Records.forEach(function(record) {
             // Get the object from the event and show its content type
-    		var bucket = event.Records[0].s3.bucket.name;
+    		var bucket = record.s3.bucket.name;
     		// NOTE key is URL encoded
-    		var key = unescape(event.Records[0].s3.object.key).replace("+", " ");
+    		var key = unescape(record.s3.object.key).replace("+", " ");
     		
     		// Prevent processing already processed files
     		if (key.indexOf("pdf") != -1)
