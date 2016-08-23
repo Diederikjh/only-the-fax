@@ -18,7 +18,39 @@ var parsedURLUpdated = function(dynamodbRecord) {
     return false;
 };
 
-var sendResponseFax = function(newImage, context){
+//TODO test
+var saveFaxSentTime = function(dynamoDbKeys, context){
+  
+  console.log(dynamoDbKeys);
+  console.log("Saving fax sent time");
+  
+    var aws = require('aws-sdk');
+    var dynamo = new aws.DynamoDB();
+    
+    var d = new Date();
+
+    var params = {
+       TableName:"fax-received",
+       Key: dynamoDbKeys,
+       UpdateExpression : "SET faxSendTime = :text",
+       ExpressionAttributeValues : { ":text": {"S":d.toISOString()} }
+    };
+    dynamo.updateItem( params, function(err, data){
+        if (err) {
+            console.log("failed to save dynamodb data");
+            console.log(err);
+            context.fail(err);
+        }
+        else
+        {
+            console.log("saved data scuucessfully");
+            context.succeed("Saved fax sent time successfully");
+        }
+    });
+    
+};
+
+var sendResponseFax = function(newImage, dynamoDbKeys, context){
     var parsedText = newImage.parsedText.S.trim();
     
     parsedText = sanitizeUrl(parsedText);
@@ -53,7 +85,7 @@ var sendResponseFax = function(newImage, context){
                     else {
                         console.log(body);
                         console.log("Successfully sent fax");
-                        context.succeed("Successfully sent fax");
+                        saveFaxSentTime(dynamoDbKeys, context);
                     }
                 });
             }
@@ -108,7 +140,7 @@ exports.handler = function(event, context) {
         console.log(record.eventName);
 
         if ((record.eventName == 'MODIFY') && parsedURLUpdated(record.dynamodb)) {
-            sendResponseFax(record.dynamodb.NewImage, context);
+            sendResponseFax(record.dynamodb.NewImage, record.dynamodb.Keys, context);
         }
         else {
             console.log('Event not interesting.');

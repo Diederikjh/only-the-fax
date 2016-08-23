@@ -57,3 +57,5 @@ db.sqlite3
 
 # Web output folder
 website/public/
+
+*apk_keys.js
