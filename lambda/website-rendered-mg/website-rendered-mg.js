@@ -41,7 +41,32 @@ var getEmailFromNumber = (faxNumber) => {
     
 };
 
-var sendFax = (faxNumber, tempFullFilename, callback) => {
+var saveFaxSentTime = (dynamoParams, callback) => {
+
+    var d = new Date();
+
+ var params = {
+       TableName:dynamoParams.TableName,
+       Key: dynamoParams.Key,
+       UpdateExpression : "SET faxSendTime = :text",
+       ExpressionAttributeValues : { ":text": {"S":d.toISOString()} }
+    };
+    dynamo.updateItem( params, function(err, data){
+        if (err) {
+            console.log("failed to save dynamodb data");
+            console.log(err);
+            callback(err);
+        }
+        else
+        {
+            console.log("saved data scuucessfully");
+            callback(null, "Saved fax sent time successfully");
+        }
+    });
+
+};
+
+var sendFax = (faxNumber, tempFullFilename, dynamoParams, callback) => {
     
     console.log("Sending fax started");
     
@@ -66,11 +91,10 @@ var sendFax = (faxNumber, tempFullFilename, callback) => {
           }
           else
           {
-            console.log('Upload successful!  Server responded with:', body);              
-            callback(null, "Fax sent");
+            console.log('Upload successful!  Server responded with:', body);
+            saveFaxSentTime(dynamoParams, callback);
           }
         }).auth('api', keys.MG_KEY);
-        
         console.log("Sending fax");
 
 };
@@ -102,7 +126,7 @@ var imageDownloaded = (tempFullFilename, key, callback) => {
       else
       {
           var faxNumber = data["Item"]["faxNumber"]["S"];
-          sendFax(faxNumber, tempFullFilename, callback);
+          sendFax(faxNumber, tempFullFilename, params, callback);
       }
   });
     
