@@ -1,0 +1,7 @@
+{
+    "name": "gc-vision-ocr",
+    "main": "gc-vision-ocr.js",
+    "dependencies": {
+        "google-cloud": "~0.43.0"
+    }
+}
