@@ -1,0 +1,67 @@
+{
+    "Records": [{
+        "eventID": "36ab1d948b57e2dd2ec96c3f735e83f7",
+        "eventName": "MODIFY",
+        "eventVersion": "1.1",
+        "eventSource": "aws:dynamodb",
+        "awsRegion": "us-west-2",
+        "dynamodb": {
+            "ApproximateCreationDateTime": 1472041200,
+            "Keys": {
+                "received": {
+                    "S": "2016-08-24T12:18:45.000Z"
+                },
+                "token": {
+                    "S": "c9f8bd48b01147ac2a11be78be91e42a19b4e9f7810fb6e5a3"
+                }
+            },
+            "NewImage": {
+                "sender": {
+                    "S": "bouncebox@faxfx.biz"
+                },
+                "subject": {
+                    "S": "Fax from: 0218801174 (0218807174) - pages:1"
+                },
+                "faxNumber": {
+                    "S": "0218801174"
+                },
+                "parsedText": {
+                    "S": "https://xkcd.com\n\n"
+                },
+                "received": {
+                    "S": "2016-08-24T12:18:45.000Z"
+                },
+                "body": {
+                    "S": "Fax from: 0218801174 (0218807174) - pages:1   \n   \n  \n   \n  \n \nYour fax is attached to this email.  \n  \n \n  This is a system generated message. Please do not reply to this email. 587154467 \n \n If you no longer require your Fax to Email number and would like to unsubscribe, please  contact  (mailto:support@faxfx.co.za?subject=Unsubscribe from 086 603 3489 ID:587154467) support@faxfx.co.za"
+                },
+                "token": {
+                    "S": "c9f8bd48b01147ac2a11be78be91e42a19b4e9f7810fb6e5a3"
+                }
+            },
+            "OldImage": {
+                "sender": {
+                    "S": "bouncebox@faxfx.biz"
+                },
+                "subject": {
+                    "S": "Fax from: 0218801174 (0218807174) - pages:1"
+                },
+                "faxNumber": {
+                    "S": "0218801174"
+                },
+                "received": {
+                    "S": "2016-08-24T12:18:45.000Z"
+                },
+                "body": {
+                    "S": "Fax from: 0218801174 (0218807174) - pages:1   \n   \n  \n   \n  \n \nYour fax is attached to this email.  \n  \n \n  This is a system generated message. Please do not reply to this email. 587154467 \n \n If you no longer require your Fax to Email number and would like to unsubscribe, please  contact  (mailto:support@faxfx.co.za?subject=Unsubscribe from 086 603 3489 ID:587154467) support@faxfx.co.za"
+                },
+                "token": {
+                    "S": "c9f8bd48b01147ac2a11be78be91e42a19b4e9f7810fb6e5a3"
+                }
+            },
+            "SequenceNumber": "72742300000000005050764777",
+            "SizeBytes": 1265,
+            "StreamViewType": "NEW_AND_OLD_IMAGES"
+        },
+        "eventSourceARN": "arn:aws:dynamodb:us-west-2:825094003471:table/fax-receive-mg/stream/2016-08-11T19:27:48.986"
+    }]
+}

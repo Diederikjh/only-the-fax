@@ -1,16 +1,36 @@
 {
-  "Records": [
-      {
-      "s3": {
-        "bucket": {
-          "name": "com.onlythefax.images",
+  "Records": [{
+    "eventVersion": "2.0",
+    "eventSource": "aws:s3",
+    "awsRegion": "us-west-2",
+    "eventTime": "2016-10-25T19:45:15.886Z",
+    "eventName": "ObjectCreated:Put",
+    "userIdentity": {
+      "principalId": "A2VWY87H5X8Y2N"
+    },
+    "requestParameters": {
+      "sourceIPAddress": "196.215.32.193"
+    },
+    "responseElements": {
+      "x-amz-request-id": "6DEE8DD96C30D9AC",
+      "x-amz-id-2": "xgD2LtVmmcv6vVR01sb+o1Z938hGvAo98bCvc5zQe/TZ7dMJLJOSAbY9ZWFhj/tD"
+    },
+    "s3": {
+      "s3SchemaVersion": "1.0",
+      "configurationId": "89c8da3e-e78f-498c-81cd-eb9442a638e3",
+      "bucket": {
+        "name": "com.onlythefax.images",
+        "ownerIdentity": {
+          "principalId": "A2VWY87H5X8Y2N"
         },
-         "object": {
-          "key": "thumbnails/2016-03-09T10:10:24.000Z_22790301/22790301.jpg",
-          "size": 1024
-        },
-        "s3SchemaVersion": "1.0"
+        "arn": "arn:aws:s3:::com.onlythefax.images"
       },
-      "eventSource": "aws:s3" }
-  ]
+      "object": {
+        "key": "fax-pdfs-mg/2016-08-24T12%3A18%3A45.000Z_c9f8bd48b01147ac2a11be78be91e42a19b4e9f7810fb6e5a3/t2.pdf",
+        "size": 2741,
+        "eTag": "238bc2a24cbe34d51dcbf8e9be893c5c",
+        "sequencer": "00580FB64B8ABDEA8A"
+      }
+    }
+  }]
 }

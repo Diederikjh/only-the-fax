@@ -1,5 +1,5 @@
 
-var parsedURLUpdated = function(dynamodbRecord) {
+exports.parsedURLUpdated = function(dynamodbRecord) {
     console.log(dynamodbRecord.OldImage);
     console.log(dynamodbRecord.NewImage);
     
@@ -17,7 +17,7 @@ var parsedURLUpdated = function(dynamodbRecord) {
     return false;
 };
 
-var sanitizeUrl = function(potentialUrl){
+exports.sanitizeUrl = function(potentialUrl){
     // Any chars (including newline) http replace with http
     potentialUrl = potentialUrl.replace(new RegExp("[\\s\\S]*http", "gm"), "http");
     // Replace all: http://stackoverflow.com/a/1144788/8524
