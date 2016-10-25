@@ -2,21 +2,7 @@ console.log('Loading function');
 
 var request = require("request");
 var validUrl = require('valid-url');
-
-var parsedURLUpdated = function(dynamodbRecord) {
-    console.log(dynamodbRecord.OldImage);
-    console.log(dynamodbRecord.NewImage);
-    if (!('parsedText' in dynamodbRecord.OldImage) && ('parsedText' in dynamodbRecord.NewImage)) {
-        if (typeof dynamodbRecord.NewImage.parsedText.S === "string") {
-            return true;
-        }
-    }
-
-    if ('parsedText' in dynamodbRecord.OldImage && 'parsedText' in dynamodbRecord.NewImage) {
-        return dynamodbRecord.OldImage.parsedText.S != dynamodbRecord.NewImage.parsedText.S;
-    }
-    return false;
-};
+var urls = require("./urls.js");
 
 //TODO test
 var saveFaxSentTime = function(dynamoDbKeys, context){
@@ -53,7 +39,7 @@ var saveFaxSentTime = function(dynamoDbKeys, context){
 var sendResponseFax = function(newImage, dynamoDbKeys, context){
     var parsedText = newImage.parsedText.S.trim();
     
-    parsedText = sanitizeUrl(parsedText);
+    parsedText = urls.sanitizeUrl(parsedText);
     
     if ('phaxio-from-number' in newImage)
     {
@@ -106,40 +92,12 @@ var sendResponseFax = function(newImage, dynamoDbKeys, context){
     }
 };
 
-var sanitizeUrl = function(potentialUrl){
-    // Any chars (including newline) http replace with http
-    potentialUrl = potentialUrl.replace(new RegExp("[\\s\\S]*http", "gm"), "http");
-    // Replace all: http://stackoverflow.com/a/1144788/8524
-    // Remove any whitespace
-    potentialUrl = potentialUrl.replace(/\s/g, "");
-    // Replace | with l. Pretty |ame if you ask me
-    potentialUrl = potentialUrl.replace(/\|/g, 'l');
-    
-    // Replace http:ll or similar with http://
-    var httpProtocols = ["http", "https"];
-    for(var i in httpProtocols)
-    {
-        var protocol = httpProtocols[i];
-        potentialUrl = potentialUrl.replace(new RegExp(protocol + ":.{2}", "i"), protocol +"://");
-    }
-    
-    // Replace .coml with .com/
-    var topLevelDomains = ["com", "org","net", "za", "uk", "au", "biz", "guru", "gov", "mil", "mobi", "edu", "io", "us"];
-    for (i in topLevelDomains)
-    {
-        var tld = topLevelDomains[i];
-        potentialUrl = potentialUrl.replace(new RegExp("\\." + tld + ".{1}", "i"), "." + tld +"/");
-    }
-    
-    return potentialUrl;
-};
-
 exports.handler = function(event, context) {
     event.Records.forEach(function(record) {
         console.log(record.eventID);
         console.log(record.eventName);
 
-        if ((record.eventName == 'MODIFY') && parsedURLUpdated(record.dynamodb)) {
+        if ((record.eventName == 'MODIFY') && urls.parsedURLUpdated(record.dynamodb)) {
             sendResponseFax(record.dynamodb.NewImage, record.dynamodb.Keys, context);
         }
         else {

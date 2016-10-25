@@ -84,16 +84,18 @@ var saveURLToDynamoDb = (urlText, imageKey, callback) => {
     
 };
 
-
 var firstValidText = (textResults) => {
   
   var arrayLength = textResults.length;
   
   for (var i = 0 ; i < arrayLength; i++  ){
-    var re= /https?:\/\//;
+      
+    var textResult = textResults[i];
+      
+    var re= /https?/;
     
-    if (re.test(textResults[i])) {
-        return textResults[i];
+    if (re.test(textResult)) {
+        return textResult;
     }
   }
   
@@ -162,9 +164,6 @@ var getImageFile = (event, context, callback) => {
     s3.getObject(params).createReadStream().pipe(file);
 };
 
-
-// TODO test
 exports.handler = (event, context, callback) => {
     getImageFile(event, context, callback);
-    
 };

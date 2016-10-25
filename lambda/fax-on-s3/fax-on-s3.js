@@ -18,7 +18,7 @@
 		return processedFilename;
 	};
 	
-	var fileConverted = function(bucket,key, processedFilename, context)
+	var fileConverted = function(bucket,key, processedFilename, callback)
 	{
 		var newKey = getProcessedFilename(key);
 		var mime = require('mime');
@@ -33,43 +33,43 @@
         function(err) {
             if (err) {
             	console.log("Failed to save to s3 " +err);
-                context.sendStatus(500);
+                callback(err, "Failed to save to s3");
             }
             else {
                 console.log('Saved processed image data to s3');
-                postOCR(bucket, newKey, context);
+                postOCR(bucket, newKey, callback);
             }
         });
 		
 	};
 	
-	var imageDownloaded = function(tempFullFilename, bucket, key, context)
+	var imageDownloaded = function(tempFullFilename, bucket, key, callback)
 	{
 		var im = require('imagemagick');
 		
 		// use image magick to convert image for better OCR.
 		var processedFilename = getProcessedFilename(tempFullFilename);
-		// TODO convert PDF to png.  from script: convert -density 300 -depth 8 -quality 85 $1[0] -resize 25% -sharpen 0x3.0 -crop 80%x80%+20%+20% -trim -fuzz 30%  $1_cropped.png
 		// add [0] for only first page of pdf.
 		// Remove alpha layer to prevent tessarect getting confused with too many colours.
 		// Add border to ensure OCR does better job.
 		// Crop outside 5% on all sides to try and get rid of fax text noise
+		// For GC-OCR don't resize image.
 		im.convert(['-density','300', '-depth', '8', '-quality', '85',tempFullFilename + "[0]", '-background', 'white', '-alpha', 'remove', '-gravity',
 		    'Center',  '-crop', '95%x95%+0+0', '-sharpen', '0x2.5', '-trim', '-fuzz', '30%', 
-		    '-bordercolor', 'white', '-border', '20%x60%', '-resize', '25%', processedFilename], 
+		    '-bordercolor', 'white', '-border', '20%x60%', processedFilename], 
 			function(err, stdout){
 			  if (err) 
 			  {
 			  	console.log(err);
-			  	context.sendStatus(500);
+			  	callback(err, "Failed to convert image");
 			  }
 			  console.log('stdout:', stdout);
-			  fileConverted(bucket, key, processedFilename, context);
+			  fileConverted(bucket, key, processedFilename, callback);
 			});
 		
 	};
 	
-	var processImage = function(bucket, key, context)
+	var processImage = function(bucket, key, callback)
 	{
 		
 		var tempFilesDirPath = '/tmp/onlyhthefax';
@@ -84,13 +84,13 @@
 
   		var finish = function() {
              console.log("write finised successfully.");
-             imageDownloaded(tempFullFilename, bucket, key, context);
+             imageDownloaded(tempFullFilename, bucket, key, callback);
         };
     
         var error = function(err) {
              console.log("Error downloading file");
              console.log(err);
-             context.sendStatus(500);
+             callback(err,"Error downloading file");
         };
 
         var file = fs.createWriteStream(tempFullFilename);
@@ -101,7 +101,7 @@
 		
 	};
 	
-	var postOCR = function(bucket, key, context)
+	var postOCR = function(bucket, key, callback)
 	{
 		var params = {
 			bucketName: bucket,
@@ -111,29 +111,26 @@
 		var dataAsString = JSON.stringify(params);
 		console.log(dataAsString);
 
-		var keys = require("./api_keys.js");
-
-	    request({ url: "http://onlythefax-ocr-env.us-west-2.elasticbeanstalk.com/image-ocr",
-        method: "POST",
-         headers: {
- 			     "x-api-key":keys.OCR_KEY
-		    },
-        json: params
-        }, function (error, response, body){
-             if (!error && response.statusCode === 200) {
-                context.succeed("Sent data to OCR");
-             }
-             else {
-                 console.log("Error with data send to OCR");
-                 console.log(response.statusCode);
-                 context.sendStatus(500);
-             }
-             console.log(body);
-        });
+		var lambda = new aws.Lambda({apiVersion: '2015-03-31'});
+		lambda.invoke( {
+			FunctionName: 'gc-vision-ocr',
+			Payload: dataAsString,
+			InvocationType: 'Event' // Async call
+		}, function(err, data)
+		{
+			if (err){
+				console.log(err);
+				callback(err, "Failed to invoke OCR lambda");
+			}
+			else{
+				callback(null, "Send to OCR successfully");
+			}
+		});
+		
 	};
 
-	exports.handler = function(event, context) {
-		//console.log('Received event:', JSON.stringify(event, null, 2));
+	exports.handler = function(event, context, callback) {
+		console.log('Received event:', JSON.stringify(event, null, 2));
 
 		// Get the object from the event and show its content type
 		var bucket = event.Records[0].s3.bucket.name;
@@ -143,11 +140,11 @@
 		// Prevent processing already processed files
 		if (key.indexOf("processed") == -1)
 		{
-			processImage(bucket, key, context);	
+			processImage(bucket, key, callback);	
 		}
 		else
 		{
-			context.succeed("File event not intresting " + key);
+			callback(null, "File event not intresting " + key);
 		}
 		
 	};
