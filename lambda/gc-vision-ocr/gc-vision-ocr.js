@@ -90,8 +90,9 @@ var firstValidText = (textResults) => {
   var arrayLength = textResults.length;
   
   for (var i = 0 ; i < arrayLength; i++  ){
-    if ('https://' in textResults[i] ||
-        'http://' in textResults[i]) {
+    var re= /https?:\/\//;
+    
+    if (re.test(textResults[i])) {
         return textResults[i];
     }
   }
@@ -159,7 +160,6 @@ var getImageFile = (event, context, callback) => {
     file.addListener('finish', finish);
     file.addListener('error', error);
     s3.getObject(params).createReadStream().pipe(file);
-
 };
 
 
