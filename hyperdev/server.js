@@ -53,6 +53,9 @@ var dreams = [
 
 var validateReceivedMessage = function(fields, req, files, phaxioHeaderValue) {
 
+//  return true for now, debugging.
+    return true;
+
     var crypto = require('crypto');
 
     // URL path of this method
@@ -261,6 +264,11 @@ var saveMGFaxDynamoDB = function(subject, faxNumber, timestamp, token, sender, b
       "body" : {"S":body}
   };
   
+  // TODO also add other fields that might be empty.
+  if (body == null || body === "") {
+    delete item.body;
+  }
+  
   dynamo.putItem({
   "TableName": "fax-receive-mg",
   "Item":item
@@ -312,10 +320,10 @@ faxReceiveFromEmailRouter.post('/', function (req, res) {
   		    }
   		    else
   		    {
-            console.log("Parsed");
-            console.log(JSON.stringify(fields));
-            console.log(JSON.stringify(files));
-            
+                console.log("Parsed");
+                console.log(JSON.stringify(fields));
+                console.log(JSON.stringify(files));
+                
             // TODO verify from field is correct. Not sure this is 100% right place. What about email send/receive use case
             /*if (emailFrom.indexOf("faxfx.biz") < 0) {
                 console.log("Email from doesn't match");
@@ -337,19 +345,19 @@ faxReceiveFromEmailRouter.post('/', function (req, res) {
       			}
       			else
       			{
-              var r = {message:fields,
-                  files: files,
-                   fromNr: faxNumber,
-                   time: timestamp,
-                   pathToFile: pdfFileAttachmentLocalPath
-              };
-              console.log(JSON.stringify(r));
-              
-              var dateString = dateStringFromTimestamp(timestamp);
-              console.log(dateString);
-              console.log(pdfFileAttachmentLocalPath);
-              
-              res.json(r);
+                  var r = {message:fields,
+                      files: files,
+                       fromNr: faxNumber,
+                       time: timestamp,
+                       pathToFile: pdfFileAttachmentLocalPath
+                  };
+                  console.log(JSON.stringify(r));
+                  
+                  var dateString = dateStringFromTimestamp(timestamp);
+                  console.log(dateString);
+                  console.log(pdfFileAttachmentLocalPath);
+                  
+                  res.json(r);
       			}
       			
   		    }
