@@ -14,3 +14,19 @@ Use cases for an app like this:
 None, except perhaps for my amusement. :)
 
 [Early test image](https://drive.google.com/file/d/0B2qYO1ogQVPaQmY2T3NRb3gtMkk/view?usp=sharing)
+
+
+Hints:
+
+Zip folder:
+    `zip -r parsed-url-rcvd.zip ./*`
+
+Send zip to lambda:
+    `aws lambda  update-function-code --function-name <name> --zip-file fileb://path/to/zip/file.zip`
+    
+Use specific node version:
+    `sudo n 4.3`
+
+ 
+ 
+ 

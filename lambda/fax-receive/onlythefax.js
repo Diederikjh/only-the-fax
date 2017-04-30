@@ -22,7 +22,7 @@ var optionallyAddField = function(attrName, fieldName, dataIn, dataOut, typeStri
 
 };
 
-var imageReceived = function(faxid, requested_at, buffer, downloadContentType, context) {
+var imageReceived = function(faxid, requested_at, buffer, downloadContentType, callback) {
     var dstBucket = "com.onlythefax.images";
     // TODO for better filename use https://www.npmjs.com/package/content-disposition
 
@@ -39,10 +39,10 @@ var imageReceived = function(faxid, requested_at, buffer, downloadContentType, c
         },
         function(err) {
             if (err) {
-                context.fail("Failed to save to s3 " + err);
+                callback(err, "Failed to save to s3");
             }
             else {
-                context.succeed('Saved image data to s3');
+                callback(null, 'Saved image data to s3');
             }
         });
 
@@ -56,7 +56,7 @@ var isInt = function (value) {
 }
 
 // Download binary to image as per https://www.phaxio.com/docs/api/general/faxFile/
-var getThumbnailImage = function(faxid, requested_at, context)
+var getThumbnailImage = function(faxid, requested_at, callback)
 {
     console.log("getThumbnailImage from phaxio");
     var phaxioFilePost = "https://api.phaxio.com/v1/faxFile";
@@ -80,10 +80,10 @@ var getThumbnailImage = function(faxid, requested_at, context)
        }, function(err, res, body) {
            if (err) {
                console.log(err);
-               context.sendStatus(500);
+               callback(err, "Phaxio get failed");
            }
            else {
-               imageReceived(faxid, requested_at, writer.toBuffer(), downloadContentType, context);
+               imageReceived(faxid, requested_at, writer.toBuffer(), downloadContentType, callback);
            }
        }).on('response', function(response) {
            console.log('response');
@@ -106,13 +106,13 @@ var getThumbnailImage = function(faxid, requested_at, context)
        .on('error', function(err) {
            console.log('error');
            console.log(err);
-           context.fail(err);
+           callback(err, "Error getting phax file");
        });
       
     console.log("requested post");
 };
 
-exports.handler = function(event, context) {
+exports.handler = function(event, context, callback) {
     console.log('Received event:', JSON.stringify(event, null, 2));
     
     //Convert epoch number date to String 
@@ -142,13 +142,13 @@ exports.handler = function(event, context) {
         "Item":item
     }, function(err, data) {
             if (err) {
-                context.fail('ERROR: Dynamo failed: ' + err);
+                callback(err, "ERROR: Dynamo failed");
             } else {
                 console.log('Dynamo Success: ' + JSON.stringify(data, null, '  '));
                 console.log('calling getThumbnailImage');
                 console.log('calling arg1 ' + event.id);
                 console.log('calling arg2 ' + requestDateAsString);
-                getThumbnailImage(event.id, requestDateAsString, context);
+                getThumbnailImage(event.id, requestDateAsString, callback);
             }
         });
         

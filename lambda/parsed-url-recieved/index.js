@@ -4,8 +4,7 @@ var request = require("request");
 var validUrl = require('valid-url');
 var urls = require("./urls.js");
 
-//TODO test
-var saveFaxSentTime = function(dynamoDbKeys, context){
+var saveFaxSentTime = function(dynamoDbKeys, callback){
   
   console.log(dynamoDbKeys);
   console.log("Saving fax sent time");
@@ -25,18 +24,18 @@ var saveFaxSentTime = function(dynamoDbKeys, context){
         if (err) {
             console.log("failed to save dynamodb data");
             console.log(err);
-            context.fail(err);
+            callback(err, "failed to save dynamodb data");
         }
         else
         {
             console.log("saved data scuucessfully");
-            context.succeed("Saved fax sent time successfully");
+            callback(null, "Saved fax sent time successfully");
         }
     });
     
 };
 
-var sendResponseFax = function(newImage, dynamoDbKeys, context){
+var sendResponseFax = function(newImage, dynamoDbKeys, callback) {
     var parsedText = newImage.parsedText.S.trim();
     
     parsedText = urls.sanitizeUrl(parsedText);
@@ -47,7 +46,7 @@ var sendResponseFax = function(newImage, dynamoDbKeys, context){
         
         // Because startsWith is missing.:(
         if (recipientNr.indexOf("+") != 0) {
-        recipientNr= "+" + recipientNr;
+            recipientNr= "+" + recipientNr;
         }
         
         console.log("sending fax of `" + parsedText + "` to " + recipientNr);
@@ -55,54 +54,54 @@ var sendResponseFax = function(newImage, dynamoDbKeys, context){
         var keys = require("./api_keys.js");
     
         if (validUrl.isUri(parsedText)) {
-        if (newImage['phaxio-is-test'].BOOL== false) {
-        request.post('https://api.phaxio.com/v1/send', {
-        form: {
-        to: recipientNr,
-        string_data: parsedText,
-        string_data_type: 'url',
-        api_key:keys.PHAXIO_API_KEY,
-        api_secret:keys.PHAXIO_API_SECRET
-                    }
-                }, function(err, res, body) {
-                    if (err) {
-                        context.fail(err);
-                    }
-                    else {
-                        console.log(body);
-                        console.log("Successfully sent fax");
-                        saveFaxSentTime(dynamoDbKeys, context);
-                    }
-                });
+            if (newImage['phaxio-is-test'].BOOL== false) {
+                request.post('https://api.phaxio.com/v1/send', {
+                    form: {
+                            to: recipientNr,
+                            string_data: parsedText,
+                            string_data_type: 'url',
+                            api_key:keys.PHAXIO_API_KEY,
+                            api_secret:keys.PHAXIO_API_SECRET
+                                }
+                        }, function(err, res, body) {
+                            if (err) {
+                                callback(err, "Failed to send fax");
+                            }
+                            else {
+                                console.log(body);
+                                console.log("Successfully sent fax");
+                                saveFaxSentTime(dynamoDbKeys, callback);
+                            }
+                        });
             }
             else {
                 console.log("Finished, but not sending fax as it is test");
-                context.succeed("Finished, but not sending fax as it is test");
+                callback(null, "Finished, but not sending fax as it is test");
             }
         }
         else {
             console.log("Text doesn't seem to be valid URI `" + parsedText + "`");
-            context.succeed("Text doesn't seem to be valid URI `" + parsedText + "`");
+            callback(null, "Text doesn't seem to be valid URI `" + parsedText + "`");
         }
     }
     else
     {
         console.log("No from number, can't send fax.");
-        context.succeed("No from number, can't send fax.");
+        callback(null, "No from number, can't send fax.");
     }
 };
 
-exports.handler = function(event, context) {
+exports.handler = function(event, context, callback) {
     event.Records.forEach(function(record) {
         console.log(record.eventID);
         console.log(record.eventName);
 
         if ((record.eventName == 'MODIFY') && urls.parsedURLUpdated(record.dynamodb)) {
-            sendResponseFax(record.dynamodb.NewImage, record.dynamodb.Keys, context);
+            sendResponseFax(record.dynamodb.NewImage, record.dynamodb.Keys, callback);
         }
         else {
             console.log('Event not interesting.');
-            context.succeed('Event not interesting.');
+            callback(null, "Event not interesting");
         }
 
     });

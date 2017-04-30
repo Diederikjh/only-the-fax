@@ -1,0 +1,44 @@
+{
+  "Records": [
+    {
+      "eventID": "2",
+      "eventVersion": "1.0",
+      "dynamodb": {
+        "OldImage": {
+          "Message": {
+            "S": "New item!"
+          },
+          "phaxio-id": {
+            "N": "27063810"
+          },
+          "phaxio-requested-at":{"S": "2016-06-12T11:30:19.000Z"}
+        },
+        "SequenceNumber": "222",
+        "Keys": {
+          "phaxio-id": {
+            "N": "27063810"
+          },
+          "phaxio-requested-at":{"S": "2016-06-12T11:30:19.000Z"}
+        },
+        "SizeBytes": 59,
+        "NewImage": {
+          "Message": {
+            "S": "This item has changed"
+          },
+          "parsedText": {"S":"https://google.com"},
+          "phaxio-from-number": {"N":27218801880},
+          "phaxio-id": {
+            "N": "27063810"
+          },
+          "phaxio-is-test": {"BOOL": true},
+          "phaxio-requested-at":{"S": "2016-06-12T11:30:19.000Z"}
+        },
+        "StreamViewType": "NEW_AND_OLD_IMAGES"
+      },
+      "awsRegion": "us-west-2",
+      "eventName": "MODIFY",
+      "eventSourceARN": "arn:aws:dynamodb:us-west-2:account-id:table/ExampleTableWithStream/stream/2015-06-27T00:48:05.899",
+      "eventSource": "aws:dynamodb"
+    }
+  ]
+}
